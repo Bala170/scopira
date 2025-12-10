@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scopira - AI-Powered Career Guidance</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <h2><i class="fas fa-compass"></i> Scopira</h2>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="jobs.html" class="nav-link">Jobs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="portfolio.html" class="nav-link">Portfolio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="profile.html" class="nav-link">Profile</a>
+                    </li>
+                    <!-- User Profile Dropdown -->
+                    <li class="nav-item user-dropdown">
+                        <a href="#" class="nav-link user-link">
+                            <i class="fas fa-user-circle"></i> John Doe <i class="fas fa-caret-down"></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="profile.html"><i class="fas fa-user"></i> My Profile</a></li>
+                            <li><a href="resume-editor.html"><i class="fas fa-file-alt"></i> Resume Editor</a></li>
+                            <li><a href="portfolio.html"><i class="fas fa-briefcase"></i> My Portfolio</a></li>
+                            <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-container">
+            <h1>AI-Powered Career Guidance</h1>
+            <p>Unlock your potential with personalized job recommendations, skill gap analysis, and AI-generated resumes.</p>
+            <div class="hero-btns">
+                <a href="signup.html" class="btn primary-btn">Get Started</a>
+                <a href="login.html" class="btn secondary-btn">Login</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="features-container">
+            <h2>Our Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-file-upload feature-icon"></i>
+                    <h3>Resume Upload & Parsing</h3>
+                    <p>Upload your resume and let our AI extract key information and skills.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-briefcase feature-icon"></i>
+                    <h3>Job Matching</h3>
+                    <p>Get personalized job recommendations based on your skills and experience.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-chart-line feature-icon"></i>
+                    <h3>Skill Gap Analysis</h3>
+                    <p>Identify missing skills and get recommendations for improvement.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-file-alt feature-icon"></i>
+                    <h3>AI Resume Maker</h3>
+                    <p>Generate ATS-friendly resumes tailored to specific job roles.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-laptop feature-icon"></i>
+                    <h3>Portfolio Creator</h3>
+                    <p>Create an interactive web portfolio to showcase your skills and projects.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-chart-pie feature-icon"></i>
+                    <h3>Interactive Dashboard</h3>
+                    <p>Visualize your skills, progress, and job matches with interactive charts.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2>How Scopira Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Upload Resume</h3>
+                    <p>Upload your current resume in PDF or DOCX format.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>AI Analysis</h3>
+                    <p>Our AI parses your resume and analyzes your skills.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Get Recommendations</h3>
+                    <p>Receive personalized job matches and skill gap analysis.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Optimize Career</h3>
+                    <p>Generate optimized resumes and build your portfolio.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-logo">
+                <h3><i class="fas fa-compass"></i> Scopira</h3>
+                <p>AI-Powered Career Guidance Platform</p>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="jobs.html">Jobs</a></li>
+                    <li><a href="portfolio.html">Portfolio</a></li>
+                    <li><a href="login.html">Login</a></li>
+                </ul>
+            </div>
+            <div class="footer-social">
+                <h4>Follow Us</h4>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Scopira. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

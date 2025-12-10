@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  database:
+    image: postgres:13
+    container_name: scopira_db
+    environment:
+      POSTGRES_DB: scopira
+      POSTGRES_USER: scopira_user
+      POSTGRES_PASSWORD: scopira_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schemas:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - scopira_network
+
+  # Flask Backend
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: scopira_backend
+    environment:
+      - DATABASE_URL=postgresql://scopira_user:scopira_password@database:5432/scopira
+      - SECRET_KEY=your-secret-key-here
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+      - ./uploads:/app/uploads
+    depends_on:
+      - database
+    networks:
+      - scopira_network
+
+  # Frontend Development Server
+  frontend:
+    image: python:3.9-slim
+    container_name: scopira_frontend
+    working_dir: /app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./frontend:/app
+    command: python -m http.server 8000
+    depends_on:
+      - backend
+    networks:
+      - scopira_network
+
+volumes:
+  postgres_data:
+
+networks:
+  scopira_network:
+    driver: bridge

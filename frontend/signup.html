@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Scopira</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <h2>Create Account</h2>
+            <p>Join Scopira to unlock your career potential</p>
+            
+            <form class="auth-form">
+                <div class="form-group">
+                    <label for="fullname">Full Name</label>
+                    <input type="text" id="fullname" placeholder="Enter your full name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Create a password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" placeholder="Confirm your password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="profession">Profession</label>
+                    <input type="text" id="profession" placeholder="e.g., Data Scientist, Software Engineer">
+                </div>
+                
+                <button type="submit" class="auth-btn">Create Account</button>
+                <div id="signup-error" style="margin-top:10px;color:#c0392b;font-size:0.9rem;display:none;"></div>
+            </form>
+            
+            <p class="back-to-login">
+                Already have an account? <a href="login.html">Login</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const signupForm = document.querySelector('.auth-form');
+            
+            signupForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const fullname = document.getElementById('fullname').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+                const profession = document.getElementById('profession').value;
+                
+                // Basic validation
+                if (!fullname || !email || !password || !confirmPassword) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+                
+                // Email validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    alert('Please enter a valid email address');
+                    return;
+                }
+                
+                // Password validation
+                if (password.length < 6) {
+                    alert('Password must be at least 6 characters long');
+                    return;
+                }
+                
+                // Password match validation
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match');
+                    return;
+                }
+                
+                const signupBtn = document.querySelector('.auth-btn');
+                const originalText = signupBtn.textContent;
+                signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+                signupBtn.disabled = true;
+
+                try {
+                    // Split fullname into first and last name
+                    const nameParts = fullname.split(' ');
+                    const firstName = nameParts[0];
+                    const lastName = nameParts.slice(1).join(' ') || '';
+
+                    const API_BASE = 'http://localhost:5000/api';
+                    const response = await fetch(`${API_BASE}/auth/register`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            username: email, // Use email as username for simplicity
+                            email: email,
+                            password: password,
+                            first_name: firstName,
+                            last_name: lastName,
+                            profession: profession // Note: Backend might need to be updated to store profession
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        alert('Account created successfully! Welcome to Scopira.');
+                        window.location.href = 'login.html';
+                    } else {
+                        const errorBox = document.getElementById('signup-error');
+                        errorBox.textContent = data.error || 'Registration failed. Please try again.';
+                        errorBox.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Signup error:', error);
+                    const errorBox = document.getElementById('signup-error');
+                    errorBox.textContent = 'An error occurred during registration. Please ensure the backend server is running.';
+                    errorBox.style.display = 'block';
+                } finally {
+                    // Reset button
+                    signupBtn.textContent = originalText;
+                    signupBtn.disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

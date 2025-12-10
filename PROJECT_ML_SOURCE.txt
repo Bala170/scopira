@@ -1,0 +1,767 @@
+Scopira ML Source Report
+Generated on: 2025-12-04
+
+========================================
+FILE: ml/README.md
+========================================
+# Machine Learning Components
+
+This directory contains all the machine learning components for the Scopira platform.
+
+## Components
+
+### Resume Parser (`resume_parser.py`)
+- Extracts information from PDF and DOCX resumes
+- Uses spaCy for Named Entity Recognition (NER)
+- Identifies skills, experience, and contact information
+
+### Job Matcher (`job_matcher.py`)
+- Calculates similarity between user profiles and job descriptions
+- Uses TF-IDF and cosine similarity
+- Matches user skills with job requirements
+
+### Skill Gap Analyzer (`skill_gap_analyzer.py`)
+- Compares user skills with job requirements
+- Identifies missing skills
+- Generates learning recommendations
+
+### Resume Generator (`resume_generator.py`)
+- Creates ATS-friendly resumes
+- Tailors resumes to specific job roles
+- Optimizes keyword usage
+
+## Setup
+
+1. Install required packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. Download spaCy English model:
+   ```bash
+   python -m spacy download en_core_web_sm
+   ```
+
+## Usage
+
+Each component can be used independently or as part of the full pipeline:
+
+```python
+# Example usage
+from scripts.resume_parser import ResumeParser
+from scripts.job_matcher import JobMatcher
+from scripts.skill_gap_analyzer import SkillGapAnalyzer
+from scripts.resume_generator import ResumeGenerator
+
+# Parse a resume
+parser = ResumeParser()
+parsed_data = parser.parse_pdf("path/to/resume.pdf")
+
+# Match user to jobs
+matcher = JobMatcher()
+similarities = matcher.calculate_similarity(user_profile, job_descriptions)
+
+# Analyze skill gaps
+analyzer = SkillGapAnalyzer()
+gaps = analyzer.analyze_gaps(user_skills, job_requirements)
+
+# Generate optimized resume
+generator = ResumeGenerator()
+resume = generator.generate_ats_friendly_resume(user_data, job_data)
+```
+
+
+========================================
+FILE: ml/requirements.txt
+========================================
+# ML Requirements
+spacy==3.4.4
+scikit-learn
+pandas==2.0.3
+numpy==1.24.3
+PyPDF2==3.0.1
+python-docx==0.8.11
+matplotlib==3.7.1
+seaborn==0.12.2
+
+
+========================================
+FILE: ml/test_ml.py
+========================================
+#!/usr/bin/env python3
+"""
+Test script for ML components
+"""
+
+import sys
+import os
+
+# Add parent directory to path to import ML modules
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from ml.scripts.resume_parser import ResumeParser
+from ml.scripts.job_matcher import JobMatcher
+from ml.scripts.skill_gap_analyzer import SkillGapAnalyzer
+from ml.scripts.resume_generator import ResumeGenerator
+
+def test_resume_parser():
+    """Test the resume parser component"""
+    print("Testing Resume Parser...")
+    
+    # Create a sample resume text
+    sample_resume = """
+    John Doe
+    Data Scientist
+    john.doe@example.com
+    (555) 123-4567
+    San Francisco, CA
+    
+    PROFESSIONAL SUMMARY
+    Experienced data scientist with 5+ years in machine learning and statistical analysis.
+    
+    SKILLS
+    Python, Machine Learning, SQL, Data Visualization, TensorFlow, Scikit-learn
+    
+    PROFESSIONAL EXPERIENCE
+    Senior Data Scientist, TechCorp (2022-Present)
+    - Developed machine learning models that improved customer retention by 25%
+    - Led a team of 3 junior data scientists
+    
+    Data Scientist, DataSystems Ltd (2020-2022)
+    - Built predictive models for sales forecasting
+    - Created interactive dashboards using Tableau
+    
+    EDUCATION
+    M.S. in Data Science, University of California (2019)
+    B.S. in Computer Science, Stanford University (2017)
+    """
+    
+    # Test the parser
+    parser = ResumeParser()
+    
+    # Since we don't have actual files, we'll test the extract_info method directly
+    parsed_data = parser.extract_info(sample_resume)
+    
+    print("Parsed entities:", parsed_data.get('entities', {}))
+    print("Parsed skills:", parsed_data.get('skills', []))
+    print("Experience sections:", len(parsed_data.get('experience', [])))
+    print("Resume Parser test completed.\n")
+
+def test_job_matcher():
+    """Test the job matcher component"""
+    print("Testing Job Matcher...")
+    
+    matcher = JobMatcher()
+    
+    # Sample user profile and job descriptions
+    user_profile = "Experienced Python developer with skills in machine learning and data analysis"
+    job_descriptions = [
+        "Looking for Python developer with machine learning experience",
+        "Seeking Java developer with Spring framework experience",
+        "Need data scientist with Python and statistics background"
+    ]
+    
+    # Calculate similarities
+    similarities = matcher.calculate_similarity(user_profile, job_descriptions)
+    
+    for i, score in enumerate(similarities):
+        print(f"Job {i+1} similarity score: {score:.3f}")
+    
+    # Test skill matching
+    user_skills = ['Python', 'Machine Learning', 'SQL']
+    job_requirements = [
+        {
+            'id': 1,
+            'skills': ['Python', 'Machine Learning', 'Deep Learning']
+        },
+        {
+            'id': 2,
+            'skills': ['Java', 'Spring', 'Hibernate']
+        }
+    ]
+    
+    matches = matcher.match_user_to_jobs(user_skills, job_requirements)
+    for match in matches:
+        print(f"Job {match['job_id']} match score: {match['match_score']:.2f}")
+        print(f"  Matched skills: {match['matched_skills']}")
+        print(f"  Missing skills: {match['missing_skills']}")
+    
+    print("Job Matcher test completed.\n")
+
+def test_skill_gap_analyzer():
+    """Test the skill gap analyzer component"""
+    print("Testing Skill Gap Analyzer...")
+    
+    analyzer = SkillGapAnalyzer()
+    
+    # Sample data
+    user_skills = ['Python', 'SQL', 'Data Analysis']
+    job_requirements = {
+        'skills': [
+            {'name': 'Python', 'importance': 5},
+            {'name': 'Machine Learning', 'importance': 4},
+            {'name': 'SQL', 'importance': 3},
+            {'name': 'Deep Learning', 'importance': 2}
+        ]
+    }
+    
+    # Analyze gaps
+    gaps = analyzer.analyze_gaps(user_skills, job_requirements)
+    
+    print(f"Match percentage: {gaps['match_percentage']:.1f}%")
+    print(f"Matched skills: {[skill['name'] for skill in gaps['matched_skills']]}")
+    print(f"Missing skills: {[skill['name'] for skill in gaps['missing_skills']]}")
+    print(f"Recommendations: {len(gaps['recommendations'])} learning resources suggested")
+    
+    print("Skill Gap Analyzer test completed.\n")
+
+def test_resume_generator():
+    """Test the resume generator component"""
+    print("Testing Resume Generator...")
+    
+    generator = ResumeGenerator()
+    
+    # Sample data
+    user_data = {
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'email': 'john.doe@example.com',
+        'phone': '+1 (555) 123-4567',
+        'skills': ['Python', 'Machine Learning', 'Data Analysis', 'SQL'],
+        'experience': [
+            'Senior Data Analyst, Tech Corp (2020-Present)\n- Led data analysis initiatives\n- Developed machine learning models',
+            'Data Analyst, Startup Inc (2018-2020)\n- Performed statistical analysis\n- Created data visualizations'
+        ],
+        'education': [
+            'M.S. in Data Science, University (2018)',
+            'B.S. in Computer Science, College (2016)'
+        ]
+    }
+    
+    job_data = {
+        'title': 'Senior Data Scientist',
+        'company': 'Innovative AI Company',
+        'requirements': [
+            {'name': 'Python'},
+            {'name': 'Machine Learning'},
+            {'name': 'Deep Learning'}
+        ]
+    }
+    
+    # Generate resume
+    resume = generator.generate_ats_friendly_resume(user_data, job_data)
+    print("Generated resume preview:")
+    print(resume[:500] + "..." if len(resume) > 500 else resume)
+    
+    print("Resume Generator test completed.\n")
+
+def main():
+    """Run all ML component tests"""
+    print("Running ML Component Tests\n")
+    
+    try:
+        test_resume_parser()
+        test_job_matcher()
+        test_skill_gap_analyzer()
+        test_resume_generator()
+        
+        print("All ML component tests completed successfully!")
+        
+    except Exception as e:
+        print(f"Error during testing: {e}")
+        return False
+    
+    return True
+
+if __name__ == "__main__":
+    success = main()
+    if not success:
+        sys.exit(1)
+
+
+========================================
+FILE: ml/scripts/job_matcher.py
+========================================
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import json
+
+class JobMatcher:
+    def __init__(self):
+        self.tfidf_vectorizer = TfidfVectorizer(stop_words='english', max_features=1000)
+    
+    def calculate_similarity(self, user_profile, job_descriptions):
+        """
+        Calculate similarity between user profile and job descriptions
+        
+        Args:
+            user_profile (str): User's resume/profile text
+            job_descriptions (list): List of job description texts
+            
+        Returns:
+            list: Similarity scores for each job
+        """
+        # Combine user profile with job descriptions for vectorization
+        texts = [user_profile] + job_descriptions
+        
+        # Vectorize texts
+        tfidf_matrix = self.tfidf_vectorizer.fit_transform(texts)
+        
+        # Calculate cosine similarity between user profile and each job
+        user_vector = tfidf_matrix[0]
+        job_vectors = tfidf_matrix[1:]
+        
+        similarities = cosine_similarity(user_vector, job_vectors)
+        
+        # Return similarity scores as a list
+        return similarities[0].tolist()
+    
+    def match_user_to_jobs(self, user_skills, job_requirements):
+        """
+        Match user skills to job requirements
+        
+        Args:
+            user_skills (list): List of user's skills
+            job_requirements (list): List of job requirement dictionaries
+            
+        Returns:
+            dict: Matching results with scores and skill gaps
+        """
+        results = []
+        
+        user_skills_set = set(skill.lower() for skill in user_skills)
+        
+        for job in job_requirements:
+            job_skills_set = set(skill.lower() for skill in job.get('skills', []))
+            
+            # Calculate match score
+            if job_skills_set:
+                matched_skills = user_skills_set.intersection(job_skills_set)
+                missing_skills = job_skills_set.difference(user_skills_set)
+                
+                match_score = len(matched_skills) / len(job_skills_set)
+                
+                results.append({
+                    'job_id': job.get('id'),
+                    'match_score': match_score,
+                    'matched_skills': list(matched_skills),
+                    'missing_skills': list(missing_skills)
+                })
+            else:
+                results.append({
+                    'job_id': job.get('id'),
+                    'match_score': 0,
+                    'matched_skills': [],
+                    'missing_skills': []
+                })
+        
+        return results
+
+# Example usage
+if __name__ == "__main__":
+    matcher = JobMatcher()
+    
+    # Example user profile and job descriptions
+    user_profile = "Experienced Python developer with skills in machine learning and data analysis"
+    job_descriptions = [
+        "Looking for Python developer with machine learning experience",
+        "Seeking Java developer with Spring framework experience",
+        "Need data scientist with Python and statistics background"
+    ]
+    
+    # Calculate similarities
+    similarities = matcher.calculate_similarity(user_profile, job_descriptions)
+    
+    for i, score in enumerate(similarities):
+        print(f"Job {i+1} similarity score: {score:.3f}")
+
+
+========================================
+FILE: ml/scripts/resume_generator.py
+========================================
+class ResumeGenerator:
+    def __init__(self):
+        pass
+    
+    def generate_ats_friendly_resume(self, user_data, job_data):
+        """
+        Generate an ATS-friendly resume tailored to a specific job
+        
+        Args:
+            user_data (dict): User's information and skills
+            job_data (dict): Job description and requirements
+            
+        Returns:
+            str: Generated resume content
+        """
+        # Extract key information
+        user_name = f"{user_data.get('first_name', '')} {user_data.get('last_name', '')}".strip()
+        user_email = user_data.get('email', '')
+        user_phone = user_data.get('phone', '')
+        user_skills = user_data.get('skills', [])
+        user_experience = user_data.get('experience', [])
+        
+        job_title = job_data.get('title', '')
+        job_company = job_data.get('company', '')
+        job_requirements = job_data.get('requirements', [])
+        
+        # Create resume header
+        resume_lines = []
+        resume_lines.append(f"{user_name}")
+        if user_email:
+            resume_lines.append(f"{user_email}")
+        if user_phone:
+            resume_lines.append(f"{user_phone}")
+        resume_lines.append("")  # Empty line
+        
+        # Professional Summary (tailored to job)
+        summary = self.generate_summary(user_data, job_data)
+        resume_lines.append("PROFESSIONAL SUMMARY")
+        resume_lines.append(summary)
+        resume_lines.append("")  # Empty line
+        
+        # Skills section (ATS-optimized)
+        if user_skills:
+            resume_lines.append("SKILLS")
+            # Format skills as a comma-separated list for ATS
+            skills_str = ", ".join(user_skills)
+            resume_lines.append(skills_str)
+            resume_lines.append("")  # Empty line
+        
+        # Experience section
+        if user_experience:
+            resume_lines.append("PROFESSIONAL EXPERIENCE")
+            for exp in user_experience:
+                resume_lines.append(exp)
+                resume_lines.append("")  # Empty line
+        
+        # Education section
+        education = user_data.get('education', [])
+        if education:
+            resume_lines.append("EDUCATION")
+            for edu in education:
+                resume_lines.append(edu)
+                resume_lines.append("")  # Empty line
+        
+        return "\n".join(resume_lines)
+    
+    def generate_summary(self, user_data, job_data):
+        """
+        Generate a professional summary tailored to the job
+        
+        Args:
+            user_data (dict): User's information
+            job_data (dict): Job information
+            
+        Returns:
+            str: Professional summary
+        """
+        user_skills = user_data.get('skills', [])
+        job_title = job_data.get('title', 'position')
+        
+        # Count matching skills
+        job_requirements = job_data.get('requirements', [])
+        matching_skills = [skill for skill in user_skills if skill.lower() in 
+                          [req.get('name', '').lower() for req in job_requirements]]
+        
+        if matching_skills:
+            skills_text = ", ".join(matching_skills[:3])  # Limit to first 3 skills
+            summary = f"Results-driven professional with expertise in {skills_text}, seeking to leverage skills and experience in the {job_title} role."
+        else:
+            summary = f"Dedicated professional seeking opportunities in the {job_title} field."
+        
+        return summary
+
+# Example usage
+if __name__ == "__main__":
+    generator = ResumeGenerator()
+    
+    user_data = {
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'email': 'john.doe@example.com',
+        'phone': '+1 (555) 123-4567',
+        'skills': ['Python', 'Machine Learning', 'Data Analysis', 'SQL'],
+        'experience': [
+            'Senior Data Analyst, Tech Corp (2020-Present)\n- Led data analysis initiatives\n- Developed machine learning models',
+            'Data Analyst, Startup Inc (2018-2020)\n- Performed statistical analysis\n- Created data visualizations'
+        ],
+        'education': [
+            'M.S. in Data Science, University (2018)',
+            'B.S. in Computer Science, College (2016)'
+        ]
+    }
+    
+    job_data = {
+        'title': 'Senior Data Scientist',
+        'company': 'Innovative AI Company',
+        'requirements': [
+            {'name': 'Python'},
+            {'name': 'Machine Learning'},
+            {'name': 'Deep Learning'}
+        ]
+    }
+    
+    resume = generator.generate_ats_friendly_resume(user_data, job_data)
+    print(resume)
+
+
+========================================
+FILE: ml/scripts/resume_parser.py
+========================================
+import spacy
+from PyPDF2 import PdfReader
+import docx
+import json
+import re
+
+class ResumeParser:
+    def __init__(self):
+        # Load spaCy model for NER
+        try:
+            self.nlp = spacy.load("en_core_web_sm")
+        except OSError:
+            print("Please install spaCy English model: python -m spacy download en_core_web_sm")
+            self.nlp = None
+    
+    def parse_pdf(self, file_path):
+        """Parse PDF resume and extract information"""
+        reader = PdfReader(file_path)
+        text = ""
+        
+        for page in reader.pages:
+            text += page.extract_text() + "\n"
+        
+        return self.extract_info(text)
+    
+    def parse_docx(self, file_path):
+        """Parse DOCX resume and extract information"""
+        doc = docx.Document(file_path)
+        text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+        return self.extract_info(text)
+    
+    def extract_info(self, text):
+        """Extract information from resume text"""
+        # Process text with spaCy
+        if self.nlp:
+            doc = self.nlp(text)
+            
+            # Extract named entities
+            entities = {
+                'PERSON': [],
+                'ORG': [],
+                'GPE': [],  # Geopolitical entity (locations)
+                'EMAIL': [],
+                'PHONE': []
+            }
+            
+            for ent in doc.ents:
+                if ent.label_ in entities:
+                    entities[ent.label_].append(ent.text)
+            
+            # Extract email addresses using regex
+            email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+            emails = re.findall(email_pattern, text)
+            entities['EMAIL'] = emails
+            
+            # Extract phone numbers using regex
+            phone_pattern = r'(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}'
+            phones = re.findall(phone_pattern, text)
+            entities['PHONE'] = phones
+            
+            # Extract skills (simplified approach)
+            skills_keywords = [
+                'python', 'java', 'javascript', 'sql', 'html', 'css', 'react', 'node.js',
+                'machine learning', 'data analysis', 'project management', 'communication',
+                'leadership', 'teamwork', 'problem solving', 'critical thinking'
+            ]
+            
+            skills = []
+            text_lower = text.lower()
+            for skill in skills_keywords:
+                if skill in text_lower:
+                    skills.append(skill)
+            
+            # Extract experience sections
+            experience_sections = self.extract_experience(text)
+            
+            return {
+                'entities': entities,
+                'skills': skills,
+                'experience': experience_sections
+            }
+        else:
+            # Fallback if spaCy is not available
+            return {
+                'text': text,
+                'skills': [],
+                'experience': []
+            }
+    
+    def extract_experience(self, text):
+        """Extract experience sections from resume"""
+        # Simple approach to find experience sections
+        experience_keywords = ['experience', 'work history', 'employment']
+        sections = []
+        
+        lines = text.split('\n')
+        in_experience_section = False
+        current_section = ""
+        
+        for line in lines:
+            line_lower = line.lower().strip()
+            
+            # Check if this line starts an experience section
+            if any(keyword in line_lower for keyword in experience_keywords):
+                if current_section:
+                    sections.append(current_section)
+                current_section = line + "\n"
+                in_experience_section = True
+            elif in_experience_section:
+                # Check if we've reached the end of the experience section
+                if line_lower in ['education', 'skills', 'projects', 'certifications'] or \
+                   (line_lower == '' and len(current_section.split('\n')) > 10):
+                    sections.append(current_section)
+                    in_experience_section = False
+                    current_section = ""
+                else:
+                    current_section += line + "\n"
+        
+        # Add the last section if it exists
+        if current_section:
+            sections.append(current_section)
+        
+        return sections
+
+# Example usage
+if __name__ == "__main__":
+    parser = ResumeParser()
+    # Example: parsed_data = parser.parse_pdf("path/to/resume.pdf")
+    # print(json.dumps(parsed_data, indent=2))
+
+
+========================================
+FILE: ml/scripts/skill_gap_analyzer.py
+========================================
+import json
+
+class SkillGapAnalyzer:
+    def __init__(self):
+        pass
+    
+    def analyze_gaps(self, user_skills, job_requirements):
+        """
+        Analyze skill gaps between user and job requirements
+        
+        Args:
+            user_skills (list): List of user's skills
+            job_requirements (dict): Job requirements with skills and importance
+            
+        Returns:
+            dict: Analysis results including gaps and recommendations
+        """
+        user_skills_set = set(skill.lower() for skill in user_skills)
+        job_skills = job_requirements.get('skills', [])
+        
+        matched_skills = []
+        missing_skills = []
+        
+        for skill in job_skills:
+            skill_name = skill.get('name', '').lower()
+            importance = skill.get('importance', 1)
+            
+            if skill_name in user_skills_set:
+                matched_skills.append({
+                    'name': skill_name,
+                    'importance': importance
+                })
+            else:
+                missing_skills.append({
+                    'name': skill_name,
+                    'importance': importance
+                })
+        
+        # Calculate match percentage
+        total_skills = len(job_skills)
+        matched_count = len(matched_skills)
+        match_percentage = (matched_count / total_skills * 100) if total_skills > 0 else 0
+        
+        # Generate recommendations
+        recommendations = self.generate_recommendations(missing_skills)
+        
+        return {
+            'match_percentage': match_percentage,
+            'matched_skills': matched_skills,
+            'missing_skills': missing_skills,
+            'recommendations': recommendations
+        }
+    
+    def generate_recommendations(self, missing_skills):
+        """
+        Generate learning recommendations for missing skills
+        
+        Args:
+            missing_skills (list): List of missing skills
+            
+        Returns:
+            list: Learning recommendations
+        """
+        # This is a simplified recommendation system
+        # In a real implementation, this would integrate with learning platforms like Coursera
+        recommendations = []
+        
+        # Common learning resources for popular skills
+        learning_resources = {
+            'python': {
+                'type': 'Online Course',
+                'platform': 'Coursera',
+                'title': 'Python for Everybody',
+                'url': 'https://www.coursera.org/specializations/python'
+            },
+            'machine learning': {
+                'type': 'Online Course',
+                'platform': 'Coursera',
+                'title': 'Machine Learning',
+                'url': 'https://www.coursera.org/learn/machine-learning'
+            },
+            'data analysis': {
+                'type': 'Online Course',
+                'platform': 'Coursera',
+                'title': 'Data Analysis and Visualization',
+                'url': 'https://www.coursera.org/specializations/data-analysis'
+            },
+            'sql': {
+                'type': 'Online Course',
+                'platform': 'Coursera',
+                'title': 'SQL for Data Science',
+                'url': 'https://www.coursera.org/learn/sql-for-data-science'
+            }
+        }
+        
+        for skill in missing_skills:
+            skill_name = skill['name']
+            if skill_name in learning_resources:
+                recommendation = learning_resources[skill_name].copy()
+                recommendation['skill'] = skill_name
+                recommendation['importance'] = skill['importance']
+                recommendations.append(recommendation)
+        
+        return recommendations
+
+# Example usage
+if __name__ == "__main__":
+    analyzer = SkillGapAnalyzer()
+    
+    user_skills = ['python', 'sql', 'data analysis']
+    job_requirements = {
+        'skills': [
+            {'name': 'python', 'importance': 5},
+            {'name': 'machine learning', 'importance': 4},
+            {'name': 'sql', 'importance': 3},
+            {'name': 'deep learning', 'importance': 2}
+        ]
+    }
+    
+    gaps = analyzer.analyze_gaps(user_skills, job_requirements)
+    print(json.dumps(gaps, indent=2))

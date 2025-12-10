@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Opportunities - Scopira</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <h2><i class="fas fa-compass"></i> Scopira</h2>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="jobs.html" class="nav-link">Jobs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="portfolio.html" class="nav-link">Portfolio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="profile.html" class="nav-link">Profile</a>
+                    </li>
+                    <!-- User Profile Dropdown -->
+                    <li class="nav-item user-dropdown">
+                        <a href="#" class="nav-link user-link">
+                            <i class="fas fa-user-circle"></i> John Doe <i class="fas fa-caret-down"></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="profile.html"><i class="fas fa-user"></i> My Profile</a></li>
+                            <li><a href="resume-editor.html"><i class="fas fa-file-alt"></i> Resume Editor</a></li>
+                            <li><a href="portfolio.html"><i class="fas fa-briefcase"></i> My Portfolio</a></li>
+                            <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Jobs Section -->
+    <section id="jobs" class="jobs">
+        <div class="container">
+            <h1>Job Opportunities</h1>
+            
+            <!-- Search and Filter -->
+            <div class="search-filters">
+                <div class="search-bar">
+                    <input type="text" id="job-search" placeholder="Search jobs by title, company, or keywords">
+                    <input type="text" id="job-location" placeholder="Location">
+                    <button id="job-search-btn" class="btn primary-btn"><i class="fas fa-search"></i> Search</button>
+                </div>
+                <div class="filters">
+                    <select id="job-type">
+                        <option value="">Job Type</option>
+                        <option value="full-time">Full Time</option>
+                        <option value="part-time">Part Time</option>
+                        <option value="contract">Contract</option>
+                        <option value="internship">Internship</option>
+                    </select>
+                    <select id="experience-level">
+                        <option value="">Experience Level</option>
+                        <option value="entry">Entry Level</option>
+                        <option value="mid">Mid Level</option>
+                        <option value="senior">Senior Level</option>
+                    </select>
+                    <select id="salary-range">
+                        <option value="">Salary Range</option>
+                        <option value="0-50k">$0 - $50k</option>
+                        <option value="50k-100k">$50k - $100k</option>
+                        <option value="100k-150k">$100k - $150k</option>
+                        <option value="150k+">$150k+</option>
+                    </select>
+                    <select id="sort-by">
+                        <option value="">Sort By</option>
+                        <option value="match">Best Match</option>
+                        <option value="date">Date Posted</option>
+                        <option value="salary">Salary</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Job Results -->
+            <div class="job-results" id="job-results">
+                <!-- Job cards will be populated dynamically -->
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="btn secondary-btn" id="prev-page"><i class="fas fa-chevron-left"></i> Previous</button>
+                <span class="page-info">Page <span id="current-page">1</span> of <span id="total-pages">5</span></span>
+                <button class="btn secondary-btn" id="next-page">Next <i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Job Detail Modal -->
+    <div id="job-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <div class="modal-body" id="modal-body">
+                <!-- Job details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-logo">
+                <h3><i class="fas fa-compass"></i> Scopira</h3>
+                <p>AI-Powered Career Guidance Platform</p>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="jobs.html">Jobs</a></li>
+                    <li><a href="portfolio.html">Portfolio</a></li>
+                </ul>
+            </div>
+            <div class="footer-social">
+                <h4>Follow Us</h4>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Scopira. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Job search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load jobs when page loads
+            loadJobs();
+            
+            // Add event listener for job search
+            const searchButton = document.getElementById('job-search-btn');
+            if (searchButton) {
+                searchButton.addEventListener('click', searchJobs);
+            }
+            
+            // Add event listeners for pagination
+            const prevButton = document.getElementById('prev-page');
+            const nextButton = document.getElementById('next-page');
+            
+            if (prevButton) {
+                prevButton.addEventListener('click', function() {
+                    changePage(-1);
+                });
+            }
+            
+            if (nextButton) {
+                nextButton.addEventListener('click', function() {
+                    changePage(1);
+                });
+            }
+            
+            // Add event listener for sort dropdown
+            const sortBy = document.getElementById('sort-by');
+            if (sortBy) {
+                sortBy.addEventListener('change', searchJobs);
+            }
+            
+            // Modal functionality
+            const modal = document.getElementById('job-modal');
+            const closeModal = document.querySelector('.close-modal');
+            
+            if (closeModal) {
+                closeModal.addEventListener('click', function() {
+                    modal.style.display = 'none';
+                });
+            }
+            
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+
+        let currentPage = 1;
+        const jobsPerPage = 6;
+        let allJobs = [];
+
+        async function loadJobs() {
+            try {
+                // Get user from localStorage
+                const userStr = localStorage.getItem('user');
+                let userId = 1; // Default fallback
+                
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    userId = user.id;
+                } else {
+                    // Redirect to login if not logged in
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                // Show loading message
+                const resultsContainer = document.getElementById('job-results');
+                if (resultsContainer) {
+                    resultsContainer.innerHTML = '<p>Loading job recommendations...</p>';
+                }
+                
+                // Call the real API
+                // We try to get recommendations first, if that fails or returns empty, we get all jobs
+                let jobsData = [];
+                
+                try {
+                    const response = await fetch(`http://localhost:5000/api/jobs/recommendations/${userId}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.recommendations && data.recommendations.length > 0) {
+                            // Map recommendations to the format expected by displayJobs
+                            jobsData = data.recommendations.map(rec => {
+                                const job = rec.job;
+                                let requirements = [];
+                                try {
+                                    if (job.requirements) {
+                                        const reqObj = JSON.parse(job.requirements);
+                                        requirements = reqObj.skills || [];
+                                    }
+                                } catch (e) {
+                                    console.error('Error parsing requirements', e);
+                                }
+                                
+                                return {
+                                    id: job.id,
+                                    title: job.title,
+                                    company: job.company,
+                                    location: job.location,
+                                    salary_range: job.salary_range,
+                                    description: job.description,
+                                    type: "Full Time", // Default
+                                    experience: "Mid", // Default
+                                    posted_date: job.posted_at || new Date().toISOString(),
+                                    match_score: rec.match_score,
+                                    requirements: requirements,
+                                    responsibilities: ["See job description for details"] // Default
+                                };
+                            });
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch recommendations, falling back to all jobs', err);
+                }
+                
+                // If no recommendations, fetch all jobs
+                if (jobsData.length === 0) {
+                    const response = await fetch('http://localhost:5000/api/jobs/');
+                    if (!response.ok) throw new Error('Failed to fetch jobs');
+                    
+                    const data = await response.json();
+                    jobsData = data.jobs.map(job => {
+                        let requirements = [];
+                        try {
+                            if (job.requirements) {
+                                const reqObj = JSON.parse(job.requirements);
+                                requirements = reqObj.skills || [];
+                            }
+                        } catch (e) {
+                            console.error('Error parsing requirements', e);
+                        }
+                        
+                        return {
+                            id: job.id,
+                            title: job.title,
+                            company: job.company,
+                            location: job.location,
+                            salary_range: job.salary_range,
+                            description: job.description,
+                            type: "Full Time",
+                            experience: "Mid",
+                            posted_date: job.posted_at || new Date().toISOString(),
+                            match_score: 0.5, // Default match score
+                            requirements: requirements,
+                            responsibilities: ["See job description for details"]
+                        };
+                    });
+                }
+                
+                allJobs = jobsData;
+                displayJobs(jobsData);
+                
+            } catch (error) {
+                console.error('Error loading jobs:', error);
+                displayError('Failed to load jobs. Please ensure the backend server is running on port 5000.');
+            }
+        }
+
+        function searchJobs() {
+            const searchTerm = document.getElementById('job-search').value.toLowerCase();
+            const location = document.getElementById('job-location').value.toLowerCase();
+            const jobType = document.getElementById('job-type').value;
+            const experienceLevel = document.getElementById('experience-level').value;
+            const salaryRange = document.getElementById('salary-range').value;
+            const sortBy = document.getElementById('sort-by').value;
+            
+            let filteredJobs = [...allJobs];
+            
+            // Apply filters
+            if (searchTerm) {
+                filteredJobs = filteredJobs.filter(job => 
+                    job.title.toLowerCase().includes(searchTerm) || 
+                    job.company.toLowerCase().includes(searchTerm) ||
+                    job.description.toLowerCase().includes(searchTerm) ||
+                    job.requirements.some(req => req.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            if (location) {
+                filteredJobs = filteredJobs.filter(job => 
+                    job.location.toLowerCase().includes(location)
+                );
+            }
+            
+            if (jobType) {
+                filteredJobs = filteredJobs.filter(job => 
+                    job.type.toLowerCase().includes(jobType)
+                );
+            }
+            
+            if (experienceLevel) {
+                filteredJobs = filteredJobs.filter(job => 
+                    job.experience.toLowerCase().includes(experienceLevel)
+                );
+            }
+            
+            if (salaryRange) {
+                // Simple filtering based on salary range
+                filteredJobs = filteredJobs.filter(job => {
+                    if (salaryRange === "0-50k") return job.salary_range.includes("$") && parseInt(job.salary_range.replace(/[^0-9]/g, '')) < 50000;
+                    if (salaryRange === "50k-100k") return job.salary_range.includes("$") && parseInt(job.salary_range.replace(/[^0-9]/g, '')) >= 50000 && parseInt(job.salary_range.replace(/[^0-9]/g, '')) <= 100000;
+                    if (salaryRange === "100k-150k") return job.salary_range.includes("$") && parseInt(job.salary_range.replace(/[^0-9]/g, '')) >= 100000 && parseInt(job.salary_range.replace(/[^0-9]/g, '')) <= 150000;
+                    if (salaryRange === "150k+") return job.salary_range.includes("$") && parseInt(job.salary_range.replace(/[^0-9]/g, '')) > 150000;
+                    return true;
+                });
+            }
+            
+            // Apply sorting
+            if (sortBy) {
+                if (sortBy === "match") {
+                    filteredJobs.sort((a, b) => b.match_score - a.match_score);
+                } else if (sortBy === "date") {
+                    filteredJobs.sort((a, b) => new Date(b.posted_date) - new Date(a.posted_date));
+                } else if (sortBy === "salary") {
+                    filteredJobs.sort((a, b) => {
+                        const aSalary = parseInt(a.salary_range.replace(/[^0-9]/g, '')) || 0;
+                        const bSalary = parseInt(b.salary_range.replace(/[^0-9]/g, '')) || 0;
+                        return bSalary - aSalary;
+                    });
+                }
+            }
+            
+            // Reset to first page when searching
+            currentPage = 1;
+            displayJobs(filteredJobs);
+        }
+
+        function displayJobs(jobs) {
+            const resultsContainer = document.getElementById('job-results');
+            
+            if (!resultsContainer) return;
+            
+            if (!jobs || jobs.length === 0) {
+                resultsContainer.innerHTML = '<p>No jobs found matching your criteria.</p>';
+                updatePagination(0);
+                return;
+            }
+            
+            // Calculate pagination
+            const startIndex = (currentPage - 1) * jobsPerPage;
+            const endIndex = Math.min(startIndex + jobsPerPage, jobs.length);
+            const paginatedJobs = jobs.slice(startIndex, endIndex);
+            
+            resultsContainer.innerHTML = paginatedJobs.map(job => `
+                <div class="job-card" data-job-id="${job.id}">
+                    <div class="job-header">
+                        <h3>${job.title}</h3>
+                        <span class="match-score">${Math.round(job.match_score * 100)}% Match</span>
+                    </div>
+                    <p class="company"><i class="fas fa-building"></i> ${job.company}</p>
+                    <p class="location"><i class="fas fa-map-marker-alt"></i> ${job.location}</p>
+                    <p class="salary"><i class="fas fa-dollar-sign"></i> ${job.salary_range}</p>
+                    <p class="description">${job.description}</p>
+                    <div class="job-tags">
+                        ${job.requirements.slice(0, 3).map(req => `<span class="tag">${req}</span>`).join('')}
+                    </div>
+                    <div class="job-actions">
+                        <button class="btn primary-btn view-details" data-job-id="${job.id}">View Details</button>
+                        <button class="btn secondary-btn save-job" data-job-id="${job.id}">Save Job</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            updatePagination(jobs.length);
+            
+            // Add event listeners to the new buttons
+            document.querySelectorAll('.view-details').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const jobId = this.getAttribute('data-job-id');
+                    showJobDetails(jobId);
+                });
+            });
+            
+            document.querySelectorAll('.save-job').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const jobId = this.getAttribute('data-job-id');
+                    saveJob(jobId);
+                });
+            });
+            
+            // Add click event to job cards
+            document.querySelectorAll('.job-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const jobId = this.getAttribute('data-job-id');
+                    showJobDetails(jobId);
+                });
+            });
+        }
+
+        function updatePagination(totalJobs) {
+            const totalPages = Math.ceil(totalJobs / jobsPerPage) || 1;
+            document.getElementById('current-page').textContent = currentPage;
+            document.getElementById('total-pages').textContent = totalPages;
+            
+            // Disable/enable pagination buttons
+            const prevButton = document.getElementById('prev-page');
+            const nextButton = document.getElementById('next-page');
+            
+            if (prevButton) {
+                prevButton.disabled = currentPage === 1;
+            }
+            
+            if (nextButton) {
+                nextButton.disabled = currentPage === totalPages;
+            }
+        }
+
+        function changePage(direction) {
+            const totalPages = Math.ceil(allJobs.length / jobsPerPage) || 1;
+            currentPage = Math.max(1, Math.min(currentPage + direction, totalPages));
+            displayJobs(allJobs);
+        }
+
+        function showJobDetails(jobId) {
+            const job = allJobs.find(j => j.id == jobId);
+            if (!job) return;
+            
+            const modalBody = document.getElementById('modal-body');
+            if (!modalBody) return;
+            
+            modalBody.innerHTML = `
+                <h2>${job.title}</h2>
+                <p class="company">${job.company}</p>
+                <div class="job-details-grid">
+                    <div class="job-main-content">
+                        <div class="job-detail-section">
+                            <h3>Job Description</h3>
+                            <p>${job.description}</p>
+                        </div>
+                        
+                        <div class="job-detail-section">
+                            <h3>Responsibilities</h3>
+                            <div class="job-responsibilities">
+                                <ul>
+                                    ${job.responsibilities.map(resp => `<li>${resp}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="job-detail-section">
+                            <h3>Requirements</h3>
+                            <div class="job-requirements">
+                                <ul>
+                                    ${job.requirements.map(req => `<li>${req}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="job-sidebar">
+                        <div class="match-score">${Math.round(job.match_score * 100)}% Match</div>
+                        
+                        <div class="job-sidebar-info">
+                            <p><i class="fas fa-map-marker-alt"></i> ${job.location}</p>
+                            <p><i class="fas fa-dollar-sign"></i> ${job.salary_range}</p>
+                            <p><i class="fas fa-briefcase"></i> ${job.type}</p>
+                            <p><i class="fas fa-user-tie"></i> ${job.experience} Level</p>
+                            <p><i class="fas fa-calendar-alt"></i> Posted: ${formatDate(job.posted_date)}</p>
+                        </div>
+                        
+                        <button class="btn primary-btn apply-btn">Apply Now</button>
+                        <button class="save-job-btn" data-job-id="${job.id}">Save Job</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('job-modal').style.display = 'flex';
+            
+            // Add event listener to save job button in modal
+            const saveJobBtn = modalBody.querySelector('.save-job-btn');
+            if (saveJobBtn) {
+                saveJobBtn.addEventListener('click', function() {
+                    saveJob(jobId);
+                });
+            }
+            
+            // Add event listener to apply button
+            const applyBtn = modalBody.querySelector('.apply-btn');
+            if (applyBtn) {
+                applyBtn.addEventListener('click', function() {
+                    applyForJob(jobId);
+                });
+            }
+        }
+
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+
+        function saveJob(jobId) {
+            // In a real app, this would make an API call to save the job
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = 'Saved!';
+            button.style.backgroundColor = '#4CAF50';
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                if (button.classList.contains('save-job-btn')) {
+                    button.style.backgroundColor = '';
+                }
+            }, 2000);
+            
+            console.log(`Job ${jobId} saved`);
+        }
+
+        function applyForJob(jobId) {
+            // In a real app, this would start the application process
+            alert(`Application process for job ${jobId} would start now!`);
+            console.log(`Applying for job ${jobId}`);
+        }
+
+        function displayError(message) {
+            const resultsContainer = document.getElementById('job-results');
+            if (resultsContainer) {
+                resultsContainer.innerHTML = `<p class="error">${message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

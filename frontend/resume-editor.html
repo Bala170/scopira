@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Editor - Scopira</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <h2><i class="fas fa-compass"></i> Scopira</h2>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="jobs.html" class="nav-link">Jobs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="portfolio.html" class="nav-link">Portfolio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="profile.html" class="nav-link">Profile</a>
+                    </li>
+                    <!-- User Profile Dropdown -->
+                    <li class="nav-item user-dropdown">
+                        <a href="#" class="nav-link user-link">
+                            <i class="fas fa-user-circle"></i> John Doe <i class="fas fa-caret-down"></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="profile.html"><i class="fas fa-user"></i> My Profile</a></li>
+                            <li><a href="resume-editor.html"><i class="fas fa-file-alt"></i> Resume Editor</a></li>
+                            <li><a href="portfolio.html"><i class="fas fa-briefcase"></i> My Portfolio</a></li>
+                            <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Resume Editor Section -->
+    <section id="resume-editor" class="resume-editor">
+        <div class="container-fluid">
+            <div class="resume-header">
+                <h1><i class="fas fa-magic"></i> AI-Powered Resume Editor</h1>
+                <div class="resume-actions">
+                    <button class="btn primary-btn" id="save-resume-btn"><i class="fas fa-save"></i> Save Changes</button>
+                    <button class="btn secondary-btn" id="download-resume-btn"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                    <button class="btn accent-btn" id="analyze-resume-btn"><i class="fas fa-robot"></i> Analyze with AI</button>
+                </div>
+            </div>
+
+            <div class="editor-layout">
+                <!-- Left Panel: Editor Form -->
+                <div class="editor-panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-edit"></i> Edit Content</h2>
+                    </div>
+                    <form id="resume-form">
+                        <div class="accordion">
+                            <!-- Personal Info -->
+                            <div class="accordion-item active">
+                                <div class="accordion-header">
+                                    <h3><i class="fas fa-user"></i> Personal Information</h3>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="form-group">
+                                        <label>Full Name</label>
+                                        <input type="text" id="edit-name" placeholder="e.g. John Doe">
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Email</label>
+                                            <input type="email" id="edit-email" placeholder="john@example.com">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Phone</label>
+                                            <input type="tel" id="edit-phone" placeholder="+1 234 567 8900">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Location</label>
+                                            <input type="text" id="edit-location" placeholder="City, Country">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>LinkedIn URL</label>
+                                            <input type="text" id="edit-linkedin" placeholder="linkedin.com/in/johndoe">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Summary -->
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <h3><i class="fas fa-align-left"></i> Professional Summary</h3>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="form-group">
+                                        <label>Summary</label>
+                                        <textarea id="edit-summary" rows="4" placeholder="Brief overview of your career..."></textarea>
+                                        <small class="form-hint">Tip: Keep it between 3-5 sentences.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Experience -->
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <h3><i class="fas fa-briefcase"></i> Work Experience</h3>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="form-group">
+                                        <label>Experience (JSON Format)</label>
+                                        <textarea id="edit-experience" rows="8" class="code-input"></textarea>
+                                        <small class="form-hint">Format: [{"title": "...", "company": "...", "duration": "...", "details": ["..."]}]</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Education -->
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <h3><i class="fas fa-graduation-cap"></i> Education</h3>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="form-group">
+                                        <label>Education (JSON Format)</label>
+                                        <textarea id="edit-education" rows="6" class="code-input"></textarea>
+                                        <small class="form-hint">Format: [{"degree": "...", "institution": "...", "duration": "..."}]</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Skills -->
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <h3><i class="fas fa-tools"></i> Skills</h3>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="form-group">
+                                        <label>Skills (Comma Separated)</label>
+                                        <textarea id="edit-skills" rows="3" placeholder="Python, Java, Leadership..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn primary-btn full-width" id="update-preview-btn">Update Preview</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Right Panel: Live Preview -->
+                <div class="preview-panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-eye"></i> Live Preview</h2>
+                        <div class="zoom-controls">
+                            <button id="zoom-out"><i class="fas fa-minus"></i></button>
+                            <span id="zoom-level">100%</span>
+                            <button id="zoom-in"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <div class="preview-container">
+                        <div class="resume-paper" id="resume-template">
+                            <div class="resume-header-section">
+                                <h1 id="resume-name">John Doe</h1>
+                                <div class="contact-info">
+                                    <span id="resume-email"><i class="fas fa-envelope"></i> john@example.com</span>
+                                    <span id="resume-phone"><i class="fas fa-phone"></i> +1 234 567 8900</span>
+                                    <span id="resume-location"><i class="fas fa-map-marker-alt"></i> City, Country</span>
+                                    <span id="resume-linkedin"><i class="fab fa-linkedin"></i> linkedin.com/in/johndoe</span>
+                                </div>
+                            </div>
+
+                            <div class="resume-body">
+                                <div class="resume-section">
+                                    <h2 class="section-title">Professional Summary</h2>
+                                    <p id="resume-summary">Experienced professional...</p>
+                                </div>
+
+                                <div class="resume-section" id="preview-experience">
+                                    <h2 class="section-title">Work Experience</h2>
+                                    <!-- Dynamic Content -->
+                                </div>
+
+                                <div class="resume-section" id="preview-education">
+                                    <h2 class="section-title">Education</h2>
+                                    <!-- Dynamic Content -->
+                                </div>
+
+                                <div class="resume-section">
+                                    <h2 class="section-title">Skills</h2>
+                                    <div class="skills-grid" id="preview-skills">
+                                        <!-- Dynamic Content -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-logo">
+                <h3><i class="fas fa-compass"></i> Scopira</h3>
+                <p>AI-Powered Career Guidance Platform</p>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="jobs.html">Jobs</a></li>
+                    <li><a href="portfolio.html">Portfolio</a></li>
+                </ul>
+            </div>
+            <div class="footer-social">
+                <h4>Follow Us</h4>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Scopira. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Analysis Modal -->
+    <div id="analysis-modal" class="modal">
+        <div class="modal-content analysis-modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-robot"></i> AI Resume Analysis</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="score-circle-container">
+                    <div class="score-circle">
+                        <span id="analysis-score">0</span>
+                        <span class="score-label">Score</span>
+                    </div>
+                </div>
+                
+                <div class="analysis-grid">
+                    <div class="analysis-column success">
+                        <h3><i class="fas fa-check-circle"></i> Strengths</h3>
+                        <ul id="analysis-strengths"></ul>
+                    </div>
+                    <div class="analysis-column warning">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Improvements</h3>
+                        <ul id="analysis-weaknesses"></ul>
+                    </div>
+                    <div class="analysis-column info">
+                        <h3><i class="fas fa-lightbulb"></i> Suggestions</h3>
+                        <ul id="analysis-suggestions"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* New Styles for Professional Editor */
+        .container-fluid {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .editor-layout {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 30px;
+            height: calc(100vh - 150px);
+        }
+
+        /* Editor Panel */
+        .editor-panel {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header h2 {
+            font-size: 1.1rem;
+            margin: 0;
+            color: #333;
+        }
+
+        #resume-form {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* Accordion Styles */
+        .accordion-item {
+            border: 1px solid #eee;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            padding: 12px 15px;
+            background: #f8f9fa;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .accordion-header:hover {
+            background: #f1f3f5;
+        }
+
+        .accordion-header h3 {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .accordion-content {
+            padding: 15px;
+            display: none;
+            border-top: 1px solid #eee;
+        }
+
+        .accordion-item.active .accordion-content {
+            display: block;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .code-input {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            background: #f8f9fa;
+        }
+
+        .form-hint {
+            display: block;
+            margin-top: 5px;
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        /* Preview Panel */
+        .preview-panel {
+            background: #e9ecef;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .preview-container {
+            flex: 1;
+            overflow: auto;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .resume-paper {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            transform-origin: top center;
+            transition: transform 0.2s;
+        }
+
+        /* Resume Template Styles */
+        .resume-header-section {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .resume-header-section h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .contact-info span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .resume-section {
+            margin-bottom: 25px;
+        }
+
+        .experience-item, .education-item {
+            margin-bottom: 15px;
+        }
+
+        .experience-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .experience-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .company {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .duration {
+            color: #777;
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        .experience-details {
+            padding-left: 20px;
+            margin-top: 5px;
+        }
+
+        .experience-details li {
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .skills-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .skill-tag {
+            background: #f1f3f5;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        /* Analysis Modal */
+        .analysis-modal-content {
+            max-width: 900px;
+            width: 90%;
+        }
+
+        .score-circle-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: conic-gradient(#4361ee var(--score, 0%), #eee 0);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .score-circle::before {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .score-circle span {
+            position: relative;
+            z-index: 1;
+            font-weight: bold;
+        }
+
+        #analysis-score {
+            font-size: 2.5rem;
+            color: #4361ee;
+        }
+
+        .score-label {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .analysis-column {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .analysis-column h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .success h3 { color: #2ecc71; }
+        .warning h3 { color: #f39c12; }
+        .info h3 { color: #3498db; }
+
+        .analysis-column ul {
+            padding-left: 20px;
+        }
+
+        .analysis-column li {
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+    </style>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Initialize jsPDF
+        const { jsPDF } = window.jspdf;
+        const API_BASE = 'http://localhost:5000/api';
+        let currentUser = null;
+        let currentPortfolio = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadResumeData();
+
+            // Accordion functionality
+            document.querySelectorAll('.accordion-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const item = header.parentElement;
+                    // Close others
+                    document.querySelectorAll('.accordion-item').forEach(i => {
+                        if (i !== item) i.classList.remove('active');
+                    });
+                    item.classList.toggle('active');
+                });
+            });
+
+            // Zoom controls
+            let zoom = 1;
+            const paper = document.getElementById('resume-template');
+            document.getElementById('zoom-in').addEventListener('click', () => {
+                zoom += 0.1;
+                updateZoom();
+            });
+            document.getElementById('zoom-out').addEventListener('click', () => {
+                if (zoom > 0.5) zoom -= 0.1;
+                updateZoom();
+            });
+
+            function updateZoom() {
+                paper.style.transform = `scale(${zoom})`;
+                document.getElementById('zoom-level').textContent = `${Math.round(zoom * 100)}%`;
+            }
+
+            // Update Preview Button
+            document.getElementById('update-preview-btn').addEventListener('click', updatePreviewFromForm);
+
+            // Save Button
+            document.getElementById('save-resume-btn').addEventListener('click', saveResumeToBackend);
+
+            // Download Button
+            document.getElementById('download-resume-btn').addEventListener('click', generatePDF);
+
+            // Analyze Button
+            document.getElementById('analyze-resume-btn').addEventListener('click', analyzeResume);
+
+            // Modal Close
+            document.querySelector('.close-modal').addEventListener('click', () => {
+                document.getElementById('analysis-modal').style.display = 'none';
+            });
+        });
+
+        async function loadResumeData() {
+            const userStr = localStorage.getItem('user');
+            if (!userStr) {
+                window.location.href = 'login.html';
+                return;
+            }
+            currentUser = JSON.parse(userStr);
+
+            try {
+                // Fetch User Data
+                const userRes = await fetch(`${API_BASE}/users/${currentUser.id}`);
+                if (userRes.ok) {
+                    const userData = await userRes.json();
+                    currentUser = userData.user;
+                }
+
+                // Fetch Portfolio Data
+                const portfolioRes = await fetch(`${API_BASE}/portfolio/${currentUser.id}`);
+                if (portfolioRes.ok) {
+                    const data = await portfolioRes.json();
+                    currentPortfolio = data.portfolio;
+                }
+
+                populateForm(currentUser, currentPortfolio);
+                updatePreview(currentUser, currentPortfolio);
+
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        function populateForm(user, portfolio) {
+            // User Info
+            document.getElementById('edit-name').value = `${user.first_name} ${user.last_name}`;
+            document.getElementById('edit-email').value = user.email || '';
+            document.getElementById('edit-phone').value = user.phone || '';
+            document.getElementById('edit-location').value = user.location || '';
+            document.getElementById('edit-summary').value = user.summary || '';
+            document.getElementById('edit-linkedin').value = ''; 
+
+            // Portfolio Info
+            if (portfolio) {
+                const experience = typeof portfolio.experience === 'string' ? portfolio.experience : JSON.stringify(portfolio.experience || [], null, 4);
+                const education = typeof portfolio.education === 'string' ? portfolio.education : JSON.stringify(portfolio.education || [], null, 4);
+                
+                let skillsStr = "";
+                const skills = typeof portfolio.skills === 'string' ? JSON.parse(portfolio.skills) : portfolio.skills;
+                if (skills) {
+                    const allSkills = [...(skills.technical || []), ...(skills.soft || [])];
+                    skillsStr = allSkills.join(', ');
+                }
+
+                document.getElementById('edit-experience').value = experience;
+                document.getElementById('edit-education').value = education;
+                document.getElementById('edit-skills').value = skillsStr;
+            }
+        }
+
+        function updatePreview(user, portfolio) {
+            // Header
+            document.getElementById('resume-name').textContent = `${user.first_name} ${user.last_name}`;
+            document.getElementById('resume-email').innerHTML = `<i class="fas fa-envelope"></i> ${user.email}`;
+            document.getElementById('resume-phone').innerHTML = `<i class="fas fa-phone"></i> ${user.phone || ''}`;
+            document.getElementById('resume-location').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${user.location || ''}`;
+            document.getElementById('resume-summary').textContent = user.summary || '';
+
+            if (portfolio) {
+                // Experience
+                const experience = typeof portfolio.experience === 'string' ? JSON.parse(portfolio.experience) : (portfolio.experience || []);
+                updateExperiencePreview(experience);
+
+                // Education
+                const education = typeof portfolio.education === 'string' ? JSON.parse(portfolio.education) : (portfolio.education || []);
+                updateEducationPreview(education);
+
+                // Skills
+                const skills = typeof portfolio.skills === 'string' ? JSON.parse(portfolio.skills) : (portfolio.skills || {});
+                const allSkills = [...(skills.technical || []), ...(skills.soft || [])];
+                updateSkillsPreview(allSkills);
+            }
+        }
+
+        function updatePreviewFromForm() {
+            try {
+                // Basic Info
+                document.getElementById('resume-name').textContent = document.getElementById('edit-name').value;
+                document.getElementById('resume-email').innerHTML = `<i class="fas fa-envelope"></i> ${document.getElementById('edit-email').value}`;
+                document.getElementById('resume-phone').innerHTML = `<i class="fas fa-phone"></i> ${document.getElementById('edit-phone').value}`;
+                document.getElementById('resume-location').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${document.getElementById('edit-location').value}`;
+                document.getElementById('resume-linkedin').innerHTML = `<i class="fab fa-linkedin"></i> ${document.getElementById('edit-linkedin').value}`;
+                document.getElementById('resume-summary').textContent = document.getElementById('edit-summary').value;
+                
+                // Experience
+                const experienceData = JSON.parse(document.getElementById('edit-experience').value || '[]');
+                updateExperiencePreview(experienceData);
+                
+                // Education
+                const educationData = JSON.parse(document.getElementById('edit-education').value || '[]');
+                updateEducationPreview(educationData);
+                
+                // Skills
+                const skillsString = document.getElementById('edit-skills').value;
+                const skillsArray = skillsString.split(',').map(skill => skill.trim()).filter(skill => skill);
+                updateSkillsPreview(skillsArray);
+                
+            } catch (error) {
+                console.error('Error updating preview:', error);
+                alert('Error updating preview. Please check your JSON formatting.');
+            }
+        }
+
+        function updateExperiencePreview(experienceData) {
+            const container = document.getElementById('preview-experience');
+            // Keep title, remove content
+            const title = container.querySelector('h2');
+            container.innerHTML = '';
+            container.appendChild(title);
+
+            experienceData.forEach(exp => {
+                const item = document.createElement('div');
+                item.className = 'experience-item';
+                item.innerHTML = `
+                    <div class="experience-header">
+                        <h3>${exp.title}</h3>
+                        <p class="company">${exp.company}</p>
+                    </div>
+                    <p class="duration">${exp.duration}</p>
+                    <ul class="experience-details">
+                        ${(exp.details || []).map(detail => `<li>${detail}</li>`).join('')}
+                    </ul>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function updateEducationPreview(educationData) {
+            const container = document.getElementById('preview-education');
+            const title = container.querySelector('h2');
+            container.innerHTML = '';
+            container.appendChild(title);
+
+            educationData.forEach(edu => {
+                const item = document.createElement('div');
+                item.className = 'education-item';
+                item.innerHTML = `
+                    <h3>${edu.degree}</h3>
+                    <p class="institution">${edu.institution}</p>
+                    <p class="duration">${edu.duration}</p>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function updateSkillsPreview(skillsArray) {
+            const container = document.getElementById('preview-skills');
+            container.innerHTML = skillsArray.map(skill => 
+                `<span class="skill-tag">${skill}</span>`
+            ).join('');
+        }
+
+        async function saveResumeToBackend() {
+            const saveBtn = document.getElementById('save-resume-btn');
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            saveBtn.disabled = true;
+
+            try {
+                // 1. Update User Profile
+                const nameParts = document.getElementById('edit-name').value.split(' ');
+                const updatedUser = {
+                    first_name: nameParts[0],
+                    last_name: nameParts.slice(1).join(' '),
+                    email: document.getElementById('edit-email').value,
+                    phone: document.getElementById('edit-phone').value,
+                    location: document.getElementById('edit-location').value,
+                    summary: document.getElementById('edit-summary').value
+                };
+
+                const userRes = await fetch(`${API_BASE}/users/${currentUser.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedUser)
+                });
+
+                // 2. Update Portfolio
+                const skillsArray = document.getElementById('edit-skills').value.split(',').map(s => s.trim()).filter(s => s);
+                const updatedPortfolio = {
+                    skills: { technical: skillsArray, soft: [] },
+                    experience: JSON.parse(document.getElementById('edit-experience').value || '[]'),
+                    education: JSON.parse(document.getElementById('edit-education').value || '[]')
+                };
+
+                const portfolioRes = await fetch(`${API_BASE}/portfolio/${currentUser.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedPortfolio)
+                });
+
+                if (userRes.ok && portfolioRes.ok) {
+                    alert('Resume saved successfully!');
+                } else {
+                    throw new Error('Failed to save data');
+                }
+
+            } catch (error) {
+                console.error('Error saving resume:', error);
+                alert('Error saving resume. Please check your JSON formatting.');
+            } finally {
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+            }
+        }
+
+        async function analyzeResume() {
+            const analyzeBtn = document.getElementById('analyze-resume-btn');
+            const originalText = analyzeBtn.innerHTML;
+            analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+            analyzeBtn.disabled = true;
+
+            try {
+                // Gather data for analysis
+                const resumeData = {
+                    summary: document.getElementById('edit-summary').value,
+                    experience: JSON.parse(document.getElementById('edit-experience').value || '[]'),
+                    education: JSON.parse(document.getElementById('edit-education').value || '[]'),
+                    skills: document.getElementById('edit-skills').value
+                };
+
+                const response = await fetch(`${API_BASE}/resumes/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(resumeData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    displayAnalysisResults(result);
+                } else {
+                    throw new Error('Analysis failed');
+                }
+
+            } catch (error) {
+                console.error('Analysis error:', error);
+                alert('Failed to analyze resume. Please check your data.');
+            } finally {
+                analyzeBtn.innerHTML = originalText;
+                analyzeBtn.disabled = false;
+            }
+        }
+
+        function displayAnalysisResults(result) {
+            const modal = document.getElementById('analysis-modal');
+            const scoreEl = document.getElementById('analysis-score');
+            const strengthsEl = document.getElementById('analysis-strengths');
+            const weaknessesEl = document.getElementById('analysis-weaknesses');
+            const suggestionsEl = document.getElementById('analysis-suggestions');
+
+            // Update Score
+            scoreEl.textContent = result.score;
+            document.querySelector('.score-circle').style.setProperty('--score', `${result.score}%`);
+
+            // Update Lists
+            strengthsEl.innerHTML = result.feedback.strengths.map(s => `<li>${s}</li>`).join('');
+            weaknessesEl.innerHTML = result.feedback.weaknesses.map(s => `<li>${s}</li>`).join('');
+            suggestionsEl.innerHTML = result.feedback.suggestions.map(s => `<li>${s}</li>`).join('');
+
+            modal.style.display = 'flex';
+        }
+
+        function generatePDF() {
+            const downloadBtn = document.getElementById('download-resume-btn');
+            const originalText = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            downloadBtn.disabled = true;
+            
+            const element = document.getElementById('resume-template');
+            
+            html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                logging: false
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210;
+                const pageHeight = 297;
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+                
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                const fileName = (document.getElementById('resume-name').textContent || 'resume').replace(/[^a-zA-Z0-9]/g, '_') + '.pdf';
+                pdf.save(fileName);
+                
+                downloadBtn.innerHTML = originalText;
+                downloadBtn.disabled = false;
+            }).catch(error => {
+                console.error('Error generating PDF:', error);
+                alert('Error generating PDF.');
+                downloadBtn.innerHTML = originalText;
+                downloadBtn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>

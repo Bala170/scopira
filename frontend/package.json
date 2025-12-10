@@ -1,0 +1,23 @@
+{
+  "name": "scopira-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Scopira - AI-Powered Career Guidance Platform",
+  "main": "index.html",
+  "scripts": {
+    "start": "python server.py",
+    "serve": "python -m http.server 8000",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "career",
+    "guidance",
+    "ai",
+    "job",
+    "matching"
+  ],
+  "author": "Scopira Team",
+  "license": "MIT",
+  "dependencies": {
+    "chart.js": "^4.3.0"
+  }
+}

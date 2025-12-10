@@ -1,0 +1,1168 @@
+========================================
+Scopira Backend Source Report
+========================================
+import sys
+import os
+
+# Add the backend directory to the Python path
+backend_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, backend_dir)
+
+from flask import Flask
+from flask_cors import CORS
+from models.db import db
+
+# Initialize Flask app
+app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
+
+# Configuration
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'dev-secret-key'
+app.config['UPLOAD_FOLDER'] = '../uploads'
+
+# Database configuration - use PostgreSQL if DATABASE_URL is set, otherwise SQLite for development
+database_url = os.environ.get('DATABASE_URL')
+if database_url:
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///scopira.db'
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize database with app
+db.init_app(app)
+
+# Create database tables if they don't exist
+with app.app_context():
+    db.create_all()
+
+# Create upload folder if it doesn't exist
+if not os.path.exists(app.config['UPLOAD_FOLDER']):
+    os.makedirs(app.config['UPLOAD_FOLDER'])
+
+# Import routes
+from routes import auth_routes, resume_routes, job_routes, portfolio_routes
+
+# Register blueprints
+app.register_blueprint(auth_routes.bp)
+app.register_blueprint(resume_routes.bp)
+app.register_blueprint(job_routes.bp)
+app.register_blueprint(portfolio_routes.bp)
+
+@app.route('/')
+def index():
+    return {'message': 'Scopira Backend API'}
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)
+
+
+========================================
+FILE: backend/Dockerfile
+========================================
+# Use Python 3.9 slim image
+FROM python:3.9-slim
+
+# Set working directory
+WORKDIR /app
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Install system dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements file
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install spaCy English model
+RUN python -m spacy download en_core_web_sm
+
+# Copy project
+COPY . .
+
+# Create non-root user
+RUN adduser --disabled-password --gecos '' appuser
+RUN chown -R appuser:appuser /app
+USER appuser
+
+# Expose port
+EXPOSE 5000
+
+# Run the application
+CMD ["python", "app.py"]
+
+
+========================================
+FILE: backend/requirements.txt
+========================================
+Flask==2.3.2
+Flask-CORS==4.0.0
+Flask-SQLAlchemy==3.0.5
+python-dotenv==1.0.0
+PyPDF2==3.0.1
+python-docx==0.8.11
+scikit-learn
+pandas==2.0.3
+numpy==1.24.3
+spacy==3.4.4
+psycopg2-binary==2.9.6
+Werkzeug==2.3.6
+
+
+========================================
+FILE: backend/README.md
+========================================
+# Backend API
+
+The backend for Scopira is built with Flask, providing RESTful APIs for the frontend to interact with.
+
+## Setup
+
+1. Install required packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. Set up the database:
+   - Create a PostgreSQL database
+   - Run the schema scripts in `../database/schemas/`
+
+3. Configure environment variables:
+   ```bash
+   export SECRET_KEY=your-secret-key
+   export DATABASE_URL=postgresql://user:password@localhost/scopira
+   ```
+
+4. Run the application:
+   ```bash
+   python app.py
+   ```
+
+## API Endpoints
+
+### Authentication
+- `POST /api/auth/register` - Register a new user
+- `POST /api/auth/login` - Login existing user
+
+### Resumes
+- `POST /api/resumes/upload` - Upload a resume
+- `GET /api/resumes/<int:user_id>` - Get user's resumes
+
+### Jobs
+- `GET /api/jobs` - Get all jobs (with optional filtering)
+- `GET /api/jobs/<int:job_id>` - Get specific job
+- `GET /api/jobs/matches/<int:user_id>` - Get user's job matches
+- `GET /api/jobs/recommendations/<int:user_id>` - Get job recommendations for user
+
+### Portfolio
+- `GET /api/portfolio/<int:user_id>` - Get user's portfolio
+- `PUT /api/portfolio/<int:user_id>` - Update user's portfolio
+
+## Database Models
+
+### User
+Represents a registered user with authentication information.
+
+### Resume
+Stores information about uploaded resumes and parsed data.
+
+### Job
+Contains job listings with descriptions and requirements.
+
+### UserJobMatch
+Stores match scores between users and jobs.
+
+## Project Structure
+
+```
+backend/
+├── app.py              # Main application entry point
+├── requirements.txt    # Python dependencies
+├── models/             # Database models
+│   ├── __init__.py
+│   ├── db.py           # Database initialization
+│   ├── user.py         # User model
+│   ├── resume.py       # Resume model
+│   ├── job.py          # Job model
+│   └── user_job_match.py # User-job match model
+├── routes/             # API routes
+│   ├── __init__.py
+│   ├── auth_routes.py  # Authentication routes
+│   ├── resume_routes.py # Resume routes
+│   ├── job_routes.py   # Job routes
+│   └── portfolio_routes.py # Portfolio routes
+└── utils/              # Utility functions
+```
+
+
+========================================
+FILE: backend/create_db.py
+========================================
+import sys
+import os
+
+# Add the current directory and backend directory to Python path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, current_dir)
+sys.path.insert(0, parent_dir)
+
+# Set the Python path environment variable
+os.environ['PYTHONPATH'] = current_dir
+
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+
+# Create a minimal Flask app for database initialization
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///scopira.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+# Define the models
+class User(db.Model):
+    __tablename__ = 'users'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(120), nullable=False)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+class Job(db.Model):
+    __tablename__ = 'jobs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    company = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    requirements = db.Column(db.Text)  # JSON string of required skills
+    location = db.Column(db.String(100))
+    salary_range = db.Column(db.String(50))
+    posted_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    active = db.Column(db.Boolean, default=True)
+
+class Resume(db.Model):
+    __tablename__ = 'resumes'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    file_path = db.Column(db.String(200), nullable=False)
+    original_filename = db.Column(db.String(100), nullable=False)
+    parsed_data = db.Column(db.Text)  # JSON string of parsed resume data
+    skills = db.Column(db.Text)  # JSON string of extracted skills
+    uploaded_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    
+    # Parsed resume fields
+    full_name = db.Column(db.String(100))
+    email = db.Column(db.String(120))
+    phone = db.Column(db.String(20))
+    summary = db.Column(db.Text)
+
+class UserJobMatch(db.Model):
+    __tablename__ = 'user_job_matches'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    job_id = db.Column(db.Integer, db.ForeignKey('jobs.id'), nullable=False)
+    match_score = db.Column(db.Float)  # Between 0 and 1
+    matched_skills = db.Column(db.Text)  # JSON string of matched skills
+    missing_skills = db.Column(db.Text)  # JSON string of missing skills
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+def create_tables():
+    with app.app_context():
+        db.create_all()
+        print("Database tables created successfully!")
+
+if __name__ == '__main__':
+    create_tables()
+
+
+========================================
+FILE: backend/init_db.py
+========================================
+import sys
+import os
+
+# Add the backend directory to the Python path
+backend_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, backend_dir)
+
+# Change to the backend directory
+os.chdir(backend_dir)
+
+# Set the PYTHONPATH environment variable
+os.environ['PYTHONPATH'] = backend_dir
+
+from app import app
+from models.db import db
+from models.user import User
+from models.job import Job
+from models.resume import Resume
+from models.user_job_match import UserJobMatch
+
+def init_db():
+    with app.app_context():
+        # Create all tables
+        db.create_all()
+        print("Database initialized successfully!")
+
+if __name__ == '__main__':
+    init_db()
+
+
+========================================
+FILE: backend/test_api.py
+========================================
+#!/usr/bin/env python3
+"""
+Test script for backend API
+"""
+
+import requests
+import json
+import os
+
+# API base URL
+BASE_URL = "http://localhost:5000/api"
+
+def test_auth_endpoints():
+    """Test authentication endpoints"""
+    print("Testing Authentication Endpoints...")
+    
+    # Test registration
+    register_data = {
+        "username": "testuser",
+        "email": "test@example.com",
+        "password": "testpassword",
+        "first_name": "Test",
+        "last_name": "User"
+    }
+    
+    try:
+        response = requests.post(f"{BASE_URL}/auth/register", json=register_data)
+        print(f"Register status code: {response.status_code}")
+        if response.status_code == 201:
+            print("Registration successful")
+            user_data = response.json()
+            print(f"User ID: {user_data.get('user', {}).get('id')}")
+        else:
+            print(f"Registration failed: {response.text}")
+    except requests.exceptions.ConnectionError:
+        print("Could not connect to backend server. Make sure it's running.")
+        return False
+    except Exception as e:
+        print(f"Error during registration test: {e}")
+        return False
+    
+    # Test login
+    login_data = {
+        "username": "testuser",
+        "password": "testpassword"
+    }
+    
+    try:
+        response = requests.post(f"{BASE_URL}/auth/login", json=login_data)
+        print(f"Login status code: {response.status_code}")
+        if response.status_code == 200:
+            print("Login successful")
+            user_data = response.json()
+            print(f"Logged in user: {user_data.get('user', {}).get('username')}")
+        else:
+            print(f"Login failed: {response.text}")
+    except Exception as e:
+        print(f"Error during login test: {e}")
+        return False
+    
+    print("Authentication endpoints test completed.\n")
+    return True
+
+def test_job_endpoints():
+    """Test job-related endpoints"""
+    print("Testing Job Endpoints...")
+    
+    try:
+        # Test getting all jobs
+        response = requests.get(f"{BASE_URL}/jobs")
+        print(f"Get jobs status code: {response.status_code}")
+        if response.status_code == 200:
+            jobs_data = response.json()
+            print(f"Retrieved {len(jobs_data.get('jobs', []))} jobs")
+        else:
+            print(f"Failed to get jobs: {response.text}")
+    except requests.exceptions.ConnectionError:
+        print("Could not connect to backend server. Make sure it's running.")
+        return False
+    except Exception as e:
+        print(f"Error during job endpoints test: {e}")
+        return False
+    
+    print("Job endpoints test completed.\n")
+    return True
+
+def test_portfolio_endpoints():
+    """Test portfolio endpoints"""
+    print("Testing Portfolio Endpoints...")
+    
+    try:
+        # Test getting portfolio (using user ID 1 as example)
+        response = requests.get(f"{BASE_URL}/portfolio/1")
+        print(f"Get portfolio status code: {response.status_code}")
+        if response.status_code == 200:
+            portfolio_data = response.json()
+            print("Portfolio retrieved successfully")
+        else:
+            print(f"Failed to get portfolio: {response.text}")
+    except requests.exceptions.ConnectionError:
+        print("Could not connect to backend server. Make sure it's running.")
+        return False
+    except Exception as e:
+        print(f"Error during portfolio endpoints test: {e}")
+        return False
+    
+    print("Portfolio endpoints test completed.\n")
+    return True
+
+def main():
+    """Run all API tests"""
+    print("Running Backend API Tests\n")
+    
+    # Check if backend server is running
+    try:
+        response = requests.get(BASE_URL)
+        if response.status_code != 200:
+            print("Backend server doesn't seem to be running at the expected URL.")
+            print("Please start the backend server with 'python backend/app.py'")
+            return False
+    except requests.exceptions.ConnectionError:
+        print("Could not connect to backend server.")
+        print("Please start the backend server with 'python backend/app.py'")
+        return False
+    except Exception as e:
+        print(f"Error checking backend server: {e}")
+        return False
+    
+    # Run tests
+    try:
+        test_auth_endpoints()
+        test_job_endpoints()
+        test_portfolio_endpoints()
+        
+        print("All API tests completed!")
+        
+    except Exception as e:
+        print(f"Error during API testing: {e}")
+        return False
+    
+    return True
+
+if __name__ == "__main__":
+    success = main()
+    if not success:
+        exit(1)
+
+
+========================================
+FILE: backend/test_job_matching.py
+========================================
+import unittest
+import json
+import sys
+import os
+
+# Add the parent directory to the path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from backend.app import app
+from backend.models.db import db
+from backend.models.user import User
+from backend.models.job import Job
+from backend.models.resume import Resume
+from backend.models.user_job_match import UserJobMatch
+
+class TestJobMatching(unittest.TestCase):
+    def setUp(self):
+        """Set up test environment"""
+        self.app = app.test_client()
+        self.app.testing = True
+        
+        # Create all tables
+        with app.app_context():
+            # Configure test database
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+            app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+            
+            # Create all tables
+            db.create_all()
+            
+            # Create test user
+            user = User(
+                username='testuser',
+                email='test@example.com',
+                first_name='Test',
+                last_name='User'
+            )
+            user.set_password('password123')
+            db.session.add(user)
+            
+            # Create test job
+            job = Job(
+                title='Data Scientist',
+                company='Tech Corp',
+                description='Looking for experienced data scientist',
+                requirements=json.dumps({'skills': ['python', 'machine learning', 'sql']}),
+                location='San Francisco, CA',
+                salary_range='$100k - $150k'
+            )
+            db.session.add(job)
+            
+            # Create test resume with skills
+            resume = Resume(
+                user_id=1,
+                file_path='/path/to/resume.pdf',
+                original_filename='resume.pdf',
+                skills=json.dumps(['python', 'sql', 'data analysis'])
+            )
+            db.session.add(resume)
+            
+            db.session.commit()
+
+    def tearDown(self):
+        """Clean up test environment"""
+        with app.app_context():
+            db.session.remove()
+            db.drop_all()
+
+    def test_get_jobs(self):
+        """Test getting jobs"""
+        with app.app_context():
+            response = self.app.get('/api/jobs/')
+            self.assertEqual(response.status_code, 200)
+            
+            data = json.loads(response.data)
+            self.assertIn('jobs', data)
+            self.assertGreater(len(data['jobs']), 0)
+
+    def test_get_job_recommendations(self):
+        """Test getting job recommendations for a user"""
+        with app.app_context():
+            response = self.app.get('/api/jobs/recommendations/1')
+            self.assertEqual(response.status_code, 200)
+            
+            data = json.loads(response.data)
+            self.assertIn('recommendations', data)
+            self.assertGreater(len(data['recommendations']), 0)
+            
+            # Check that match scores are calculated
+            recommendation = data['recommendations'][0]
+            self.assertIn('match_score', recommendation)
+            self.assertIn('matched_skills', recommendation)
+            self.assertIn('missing_skills', recommendation)
+
+    def test_calculate_job_match(self):
+        """Test calculating job match between user and job"""
+        with app.app_context():
+            # First, get a job to match against
+            job = Job.query.first()
+            
+            response = self.app.post('/api/jobs/match', 
+                                   data=json.dumps({
+                                       'user_id': 1,
+                                       'job_id': job.id
+                                   }),
+                                   content_type='application/json')
+            
+            self.assertEqual(response.status_code, 201)
+            
+            data = json.loads(response.data)
+            self.assertIn('match_score', data)
+            self.assertIn('matched_skills', data)
+            self.assertIn('missing_skills', data)
+            
+            # Check that match was saved to database
+            match = UserJobMatch.query.filter_by(user_id=1, job_id=job.id).first()
+            self.assertIsNotNone(match)
+
+    def test_get_user_job_matches(self):
+        """Test getting user job matches"""
+        # First create a match
+        with app.app_context():
+            job = Job.query.first()
+            match = UserJobMatch(
+                user_id=1,
+                job_id=job.id,
+                match_score=0.8,
+                matched_skills=json.dumps(['python', 'sql']),
+                missing_skills=json.dumps(['machine learning'])
+            )
+            db.session.add(match)
+            db.session.commit()
+            
+            response = self.app.get('/api/jobs/matches/1')
+            self.assertEqual(response.status_code, 200)
+            
+            data = json.loads(response.data)
+            self.assertIn('matches', data)
+            self.assertGreater(len(data['matches']), 0)
+            
+            match_data = data['matches'][0]
+            self.assertIn('job', match_data)
+            self.assertIn('match_score', match_data)
+
+if __name__ == '__main__':
+    unittest.main()
+
+
+========================================
+FILE: backend/models/__init__.py
+========================================
+# Database models package
+from models.db import db
+from models.user import User
+from models.job import Job
+from models.resume import Resume
+from models.user_job_match import UserJobMatch
+
+__all__ = ['db', 'User', 'Job', 'Resume', 'UserJobMatch']
+
+
+========================================
+FILE: backend/models/db.py
+========================================
+from flask_sqlalchemy import SQLAlchemy
+
+# Initialize SQLAlchemy
+db = SQLAlchemy()
+
+
+========================================
+FILE: backend/models/user.py
+========================================
+from models.db import db
+from werkzeug.security import generate_password_hash, check_password_hash
+
+class User(db.Model):
+    __tablename__ = 'users'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(120), nullable=False)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    
+    # Relationship with resumes
+    resumes = db.relationship('Resume', backref='user', lazy=True)
+    
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+    
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'email': self.email,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+
+
+========================================
+FILE: backend/models/job.py
+========================================
+from models.db import db
+from datetime import datetime
+
+class Job(db.Model):
+    __tablename__ = 'jobs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    company = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    requirements = db.Column(db.Text)  # JSON string of required skills
+    location = db.Column(db.String(100))
+    salary_range = db.Column(db.String(50))
+    posted_at = db.Column(db.DateTime, default=datetime.utcnow)
+    active = db.Column(db.Boolean, default=True)
+    
+    # Relationship with user-job matches
+    matches = db.relationship('UserJobMatch', backref='job', lazy=True)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'company': self.company,
+            'description': self.description,
+            'location': self.location,
+            'salary_range': self.salary_range,
+            'posted_at': self.posted_at.isoformat() if self.posted_at else None
+        }
+
+
+========================================
+FILE: backend/models/resume.py
+========================================
+from models.db import db
+from datetime import datetime
+
+class Resume(db.Model):
+    __tablename__ = 'resumes'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    file_path = db.Column(db.String(200), nullable=False)
+    original_filename = db.Column(db.String(100), nullable=False)
+    parsed_data = db.Column(db.Text)  # JSON string of parsed resume data
+    skills = db.Column(db.Text)  # JSON string of extracted skills
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Parsed resume fields
+    full_name = db.Column(db.String(100))
+    email = db.Column(db.String(120))
+    phone = db.Column(db.String(20))
+    summary = db.Column(db.Text)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'original_filename': self.original_filename,
+            'uploaded_at': self.uploaded_at.isoformat() if self.uploaded_at else None,
+            'full_name': self.full_name,
+            'email': self.email,
+            'phone': self.phone,
+            'skills': self.skills
+        }
+
+
+========================================
+FILE: backend/models/user_job_match.py
+========================================
+from models.db import db
+from datetime import datetime
+
+class UserJobMatch(db.Model):
+    __tablename__ = 'user_job_matches'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    job_id = db.Column(db.Integer, db.ForeignKey('jobs.id'), nullable=False)
+    match_score = db.Column(db.Float)  # Between 0 and 1
+    matched_skills = db.Column(db.Text)  # JSON string of matched skills
+    missing_skills = db.Column(db.Text)  # JSON string of missing skills
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'job_id': self.job_id,
+            'match_score': self.match_score,
+            'matched_skills': self.matched_skills,
+            'missing_skills': self.missing_skills,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+
+
+========================================
+FILE: backend/routes/__init__.py
+========================================
+# Routes package
+
+
+========================================
+FILE: backend/routes/auth_routes.py
+========================================
+from flask import Blueprint, request, jsonify
+from models.user import User
+from models.db import db
+
+bp = Blueprint('auth', __name__, url_prefix='/api/auth')
+
+@bp.route('/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    
+    # Validate required fields
+    if not data or not all(k in data for k in ('username', 'email', 'password', 'first_name', 'last_name')):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    # Check if user already exists
+    if User.query.filter_by(username=data['username']).first():
+        return jsonify({'error': 'Username already exists'}), 400
+    
+    if User.query.filter_by(email=data['email']).first():
+        return jsonify({'error': 'Email already registered'}), 400
+    
+    # Create new user
+    user = User(
+        username=data['username'],
+        email=data['email'],
+        first_name=data['first_name'],
+        last_name=data['last_name']
+    )
+    user.set_password(data['password'])
+    
+    # Save to database
+    db.session.add(user)
+    db.session.commit()
+    
+    return jsonify({'message': 'User registered successfully', 'user': user.to_dict()}), 201
+
+@bp.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    
+    # Validate required fields
+    if not data or not all(k in data for k in ('username', 'password')):
+        return jsonify({'error': 'Username and password required'}), 400
+    
+    # Find user
+    user = User.query.filter_by(username=data['username']).first()
+    if not user or not user.check_password(data['password']):
+        return jsonify({'error': 'Invalid username or password'}), 401
+    
+    return jsonify({'message': 'Login successful', 'user': user.to_dict()}), 200
+
+
+========================================
+FILE: backend/routes/job_routes.py
+========================================
+from flask import Blueprint, request, jsonify
+from models.job import Job
+from models.user_job_match import UserJobMatch
+from models.user import User
+from models.resume import Resume
+from models.db import db
+import json
+
+bp = Blueprint('jobs', __name__, url_prefix='/api/jobs')
+
+@bp.route('/', methods=['GET'])
+def get_jobs():
+    # Get query parameters for filtering
+    location = request.args.get('location')
+    title = request.args.get('title')
+    
+    # Build query
+    query = Job.query.filter_by(active=True)
+    
+    if location:
+        query = query.filter(Job.location.contains(location))
+    
+    if title:
+        query = query.filter(Job.title.contains(title))
+    
+    jobs = query.all()
+    
+    return jsonify({'jobs': [job.to_dict() for job in jobs]}), 200
+
+@bp.route('/<int:job_id>', methods=['GET'])
+def get_job(job_id):
+    job = Job.query.get_or_404(job_id)
+    return jsonify({'job': job.to_dict()}), 200
+
+@bp.route('/matches/<int:user_id>', methods=['GET'])
+def get_user_job_matches(user_id):
+    matches = UserJobMatch.query.filter_by(user_id=user_id).join(Job).all()
+    
+    result = []
+    for match in matches:
+        match_data = match.to_dict()
+        match_data['job'] = match.job.to_dict()
+        result.append(match_data)
+    
+    return jsonify({'matches': result}), 200
+
+@bp.route('/recommendations/<int:user_id>', methods=['GET'])
+def get_job_recommendations(user_id):
+    # Check if user exists
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    # Get user's resume to extract skills
+    resume = Resume.query.filter_by(user_id=user_id).first()
+    if not resume:
+        # If no resume, return general job listings
+        jobs = Job.query.filter_by(active=True).limit(10).all()
+        recommendations = []
+        for job in jobs:
+            recommendations.append({
+                'job_id': job.id,
+                'job': job.to_dict(),
+                'match_score': 0.5,  # Default match score
+                'matched_skills': [],
+                'missing_skills': []
+            })
+        return jsonify({'recommendations': recommendations}), 200
+    
+    # Get user skills from resume
+    user_skills = []
+    if resume.skills:
+        try:
+            user_skills = json.loads(resume.skills)
+        except json.JSONDecodeError:
+            user_skills = []
+    
+    # Get all active jobs
+    jobs = Job.query.filter_by(active=True).all()
+    
+    # Calculate match scores for each job
+    recommendations = []
+    for job in jobs:
+        # Get job requirements
+        job_skills = []
+        if job.requirements:
+            try:
+                job_requirements = json.loads(job.requirements)
+                job_skills = job_requirements.get('skills', [])
+            except json.JSONDecodeError:
+                job_skills = []
+        
+        # Calculate match score based on skills
+        if job_skills:
+            matched_skills = set(user_skills) & set(job_skills)
+            match_score = len(matched_skills) / len(job_skills) if len(job_skills) > 0 else 0
+        else:
+            match_score = 0.5  # Default match score if no requirements specified
+        
+        recommendations.append({
+            'job_id': job.id,
+            'job': job.to_dict(),
+            'match_score': match_score,
+            'matched_skills': list(set(user_skills) & set(job_skills)),
+            'missing_skills': list(set(job_skills) - set(user_skills))
+        })
+    
+    # Sort by match score (descending)
+    recommendations.sort(key=lambda x: x['match_score'], reverse=True)
+    
+    # Return top 10 recommendations
+    return jsonify({'recommendations': recommendations[:10]}), 200
+
+@bp.route('/match', methods=['POST'])
+def calculate_job_match():
+    """Calculate match score between a user and a job"""
+    data = request.get_json()
+    
+    user_id = data.get('user_id')
+    job_id = data.get('job_id')
+    
+    if not user_id or not job_id:
+        return jsonify({'error': 'user_id and job_id are required'}), 400
+    
+    # Get user and job
+    user = User.query.get(user_id)
+    job = Job.query.get(job_id)
+    
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+    
+    # Get user's resume to extract skills
+    resume = Resume.query.filter_by(user_id=user_id).first()
+    if not resume:
+        return jsonify({'error': 'User resume not found'}), 404
+    
+    # Get user skills from resume
+    user_skills = []
+    if resume.skills:
+        try:
+            user_skills = json.loads(resume.skills)
+        except json.JSONDecodeError:
+            user_skills = []
+    
+    # Get job requirements
+    job_skills = []
+    if job.requirements:
+        try:
+            job_requirements = json.loads(job.requirements)
+            job_skills = job_requirements.get('skills', [])
+        except json.JSONDecodeError:
+            job_skills = []
+    
+    # Calculate match score
+    if job_skills:
+        matched_skills = set(user_skills) & set(job_skills)
+        missing_skills = set(job_skills) - set(user_skills)
+        match_score = len(matched_skills) / len(job_skills)
+    else:
+        matched_skills = []
+        missing_skills = []
+        match_score = 0.5  # Default match score if no requirements specified
+    
+    # Save match to database
+    user_job_match = UserJobMatch(
+        user_id=user_id,
+        job_id=job_id,
+        match_score=match_score,
+        matched_skills=json.dumps(list(matched_skills)),
+        missing_skills=json.dumps(list(missing_skills))
+    )
+    
+    db.session.add(user_job_match)
+    db.session.commit()
+    
+    return jsonify({
+        'match_id': user_job_match.id,
+        'match_score': match_score,
+        'matched_skills': list(matched_skills),
+        'missing_skills': list(missing_skills)
+    }), 201
+
+
+========================================
+FILE: backend/routes/portfolio_routes.py
+========================================
+from flask import Blueprint, request, jsonify
+
+bp = Blueprint('portfolio', __name__, url_prefix='/api/portfolio')
+
+@bp.route('/<int:user_id>', methods=['GET'])
+def get_portfolio(user_id):
+    # In a real implementation, this would fetch portfolio data from the database
+    # For now, we'll return a placeholder
+    portfolio_data = {
+        'user_id': user_id,
+        'skills': [],
+        'projects': [],
+        'certifications': [],
+        'experience': []
+    }
+    
+    return jsonify({'portfolio': portfolio_data}), 200
+
+@bp.route('/<int:user_id>', methods=['PUT'])
+def update_portfolio(user_id):
+    data = request.get_json()
+    
+    # In a real implementation, this would update portfolio data in the database
+    # For now, we'll just return the received data
+    return jsonify({'message': 'Portfolio updated successfully', 'portfolio': data}), 200
+
+
+========================================
+FILE: backend/routes/resume_routes.py
+========================================
+from flask import Blueprint, request, jsonify
+from models.resume import Resume
+from models.db import db
+import os
+import json
+from werkzeug.utils import secure_filename
+
+# Try to import resume parser, but don't fail if ML dependencies are missing
+try:
+    import sys
+    import os as sys_os
+    sys.path.append(sys_os.path.join(sys_os.path.dirname(__file__), '..', '..', 'ml', 'scripts'))
+    from resume_parser import ResumeParser
+    PARSER_AVAILABLE = True
+except ImportError:
+    PARSER_AVAILABLE = False
+    print("Warning: Resume parser not available - ML dependencies may be missing")
+
+bp = Blueprint('resumes', __name__, url_prefix='/api/resumes')
+
+# Allowed file extensions
+ALLOWED_EXTENSIONS = {'pdf', 'docx'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@bp.route('/upload', methods=['POST'])
+def upload_resume():
+    # Check if file is present in request
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+    
+    file = request.files['file']
+    
+    # Check if file has a filename
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+    
+    # Check if file extension is allowed
+    if not allowed_file(file.filename):
+        return jsonify({'error': 'Invalid file type. Only PDF and DOCX files are allowed.'}), 400
+    
+    # Get user_id from form data
+    user_id = request.form.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'User ID is required'}), 400
+    
+    try:
+        # Secure the filename
+        filename = secure_filename(file.filename)
+        
+        # Create upload directory if it doesn't exist
+        upload_dir = '../uploads'
+        if not os.path.exists(upload_dir):
+            os.makedirs(upload_dir)
+        
+        # Save file
+        file_path = os.path.join(upload_dir, filename)
+        file.save(file_path)
+        
+        # Parse resume to extract skills
+        skills = []
+        try:
+            if PARSER_AVAILABLE:
+                parser = ResumeParser()
+                if filename.endswith('.pdf'):
+                    parsed_data = parser.parse_pdf(file_path)
+                elif filename.endswith('.docx'):
+                    parsed_data = parser.parse_docx(file_path)
+                else:
+                    parsed_data = parser.extract_info(open(file_path, 'r').read())
+                
+                skills = parsed_data.get('skills', [])
+            else:
+                print("Resume parser not available - skipping skill extraction")
+        except Exception as e:
+            print(f"Error parsing resume: {str(e)}")
+            # Continue with empty skills if parsing fails
+        
+        # Create resume record
+        resume = Resume(
+            user_id=user_id,
+            file_path=file_path,
+            original_filename=filename,
+            skills=json.dumps(skills) if skills else None
+        )
+        
+        # Save to database
+        db.session.add(resume)
+        db.session.commit()
+        
+        return jsonify({'message': 'Resume uploaded successfully', 'resume': resume.to_dict()}), 201
+    
+    except Exception as e:
+        return jsonify({'error': f'Failed to upload resume: {str(e)}'}), 500
+
+@bp.route('/<int:user_id>', methods=['GET'])
+def get_user_resumes(user_id):
+    resumes = Resume.query.filter_by(user_id=user_id).all()
+    return jsonify({'resumes': [resume.to_dict() for resume in resumes]}), 200

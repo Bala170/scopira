@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Scopira</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <h2><i class="fas fa-compass"></i> Scopira</h2>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="jobs.html" class="nav-link">Jobs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="portfolio.html" class="nav-link">Portfolio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="profile.html" class="nav-link">Profile</a>
+                    </li>
+                    <!-- User Profile Dropdown -->
+                    <li class="nav-item user-dropdown">
+                        <a href="#" class="nav-link user-link">
+                            <i class="fas fa-user-circle"></i> John Doe <i class="fas fa-caret-down"></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="profile.html"><i class="fas fa-user"></i> My Profile</a></li>
+                            <li><a href="resume-editor.html"><i class="fas fa-file-alt"></i> Resume Editor</a></li>
+                            <li><a href="portfolio.html"><i class="fas fa-briefcase"></i> My Portfolio</a></li>
+                            <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Dashboard Section -->
+    <section id="dashboard" class="dashboard">
+        <div class="container">
+            <h1>Dashboard</h1>
+            
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-briefcase stat-icon"></i>
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Job Matches</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-star stat-icon"></i>
+                    <div class="stat-value">85%</div>
+                    <div class="stat-label">Profile Complete</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-tasks stat-icon"></i>
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Actions Due</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-chart-line stat-icon"></i>
+                    <div class="stat-value">78%</div>
+                    <div class="stat-label">Skill Match</div>
+                </div>
+            </div>
+            
+            <div class="dashboard-grid">
+                <!-- Profile Summary -->
+                <div class="card">
+                    <h2><i class="fas fa-user"></i> Profile Summary</h2>
+                    <div class="profile-summary">
+                        <div class="profile-info">
+                            <div class="profile-image-placeholder">
+                                <i class="fas fa-user-circle" style="font-size: 4rem; color: #4361ee;"></i>
+                            </div>
+                            <h3>John Doe</h3>
+                            <p>Senior Data Scientist</p>
+                            <p><i class="fas fa-envelope"></i> john.doe@example.com</p>
+                            <p><i class="fas fa-map-marker-alt"></i> San Francisco, CA</p>
+                        </div>
+                        <div class="profile-actions">
+                            <button class="btn primary-btn" onclick="window.location.href='profile.html'"><i class="fas fa-edit"></i> Edit Profile</button>
+                            <button class="btn secondary-btn" onclick="window.location.href='portfolio.html'"><i class="fas fa-eye"></i> View Portfolio</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skill Visualization -->
+                <div class="card">
+                    <h2><i class="fas fa-chart-radar"></i> Skills Overview</h2>
+                    <div class="chart-container">
+                        <canvas id="skills-radar"></canvas>
+                    </div>
+                </div>
+
+                <!-- Job Match Visualization -->
+                <div class="card">
+                    <h2><i class="fas fa-briefcase"></i> Job Match Scores</h2>
+                    <div class="chart-container">
+                        <canvas id="job-match-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card">
+                    <h2><i class="fas fa-history"></i> Recent Activity</h2>
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <i class="fas fa-file-upload activity-icon"></i>
+                            <div class="activity-content">
+                                <p>Resume uploaded successfully</p>
+                                <span class="activity-time">2 hours ago</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <i class="fas fa-briefcase activity-icon"></i>
+                            <div class="activity-content">
+                                <p>Matched with 12 new job opportunities</p>
+                                <span class="activity-time">1 day ago</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <i class="fas fa-chart-line activity-icon"></i>
+                            <div class="activity-content">
+                                <p>Skill gap analysis completed</p>
+                                <span class="activity-time">2 days ago</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <i class="fas fa-certificate activity-icon"></i>
+                            <div class="activity-content">
+                                <p>Completed Python for Data Science course</p>
+                                <span class="activity-time">3 days ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="card">
+                    <h2><i class="fas fa-lightbulb"></i> Recommendations</h2>
+                    <div class="recommendations">
+                        <div class="recommendation-item">
+                            <h3>Skill Gap Identified</h3>
+                            <p>You're missing skills in Deep Learning which is required for 78% of Data Scientist positions.</p>
+                            <button class="btn secondary-btn"><i class="fas fa-graduation-cap"></i> View Courses</button>
+                        </div>
+                        <div class="recommendation-item">
+                            <h3>Job Match</h3>
+                            <p>Senior Data Scientist position at TechCorp matches 92% of your skills.</p>
+                            <button class="btn primary-btn"><i class="fas fa-eye"></i> View Details</button>
+                        </div>
+                        <div class="recommendation-item">
+                            <h3>Profile Enhancement</h3>
+                            <p>Add your GitHub portfolio to increase your profile completeness by 15%.</p>
+                            <button class="btn secondary-btn"><i class="fas fa-plus"></i> Add Now</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Actions -->
+                <div class="card">
+                    <h2><i class="fas fa-tasks"></i> Upcoming Actions</h2>
+                    <div class="actions-list">
+                        <div class="action-item">
+                            <p>Complete Python certification course</p>
+                            <span class="due-date">Due: 15 Oct 2025</span>
+                        </div>
+                        <div class="action-item">
+                            <p>Update resume for Machine Learning roles</p>
+                            <span class="due-date">Due: 20 Oct 2025</span>
+                        </div>
+                        <div class="action-item">
+                            <p>Apply to 3 recommended positions</p>
+                            <span class="due-date">Due: 25 Oct 2025</span>
+                        </div>
+                        <div class="action-item">
+                            <p>Schedule networking call with industry expert</p>
+                            <span class="due-date">Due: 30 Oct 2025</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-logo">
+                <h3><i class="fas fa-compass"></i> Scopira</h3>
+                <p>AI-Powered Career Guidance Platform</p>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="jobs.html">Jobs</a></li>
+                    <li><a href="portfolio.html">Portfolio</a></li>
+                </ul>
+            </div>
+            <div class="footer-social">
+                <h4>Follow Us</h4>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Scopira. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        let currentUser = null;
+        let currentPortfolio = null;
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            const userStr = localStorage.getItem('user');
+            if (!userStr) {
+                window.location.href = 'login.html';
+                return;
+            }
+            currentUser = JSON.parse(userStr);
+            
+            // Update UI with basic user info immediately
+            updateUserUI(currentUser);
+
+            try {
+                // Fetch latest User Data
+                const userRes = await fetch(`${API_BASE}/users/${currentUser.id}`);
+                if (userRes.ok) {
+                    const userData = await userRes.json();
+                    currentUser = userData.user;
+                    updateUserUI(currentUser);
+                }
+
+                // Fetch Portfolio Data
+                const portfolioRes = await fetch(`${API_BASE}/portfolio/${currentUser.id}`);
+                if (portfolioRes.ok) {
+                    const data = await portfolioRes.json();
+                    currentPortfolio = data.portfolio;
+                    updateDashboardStats(currentPortfolio);
+                    initCharts(currentPortfolio);
+                }
+
+                // Fetch Job Recommendations Count (Mock for now or real if endpoint exists)
+                // We can reuse the logic from jobs.html if we want, but for dashboard summary:
+                fetchJobStats();
+
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+
+            // Add click effects to cards
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    if (!e.target.closest('button')) {
+                        this.style.transform = 'scale(0.98)';
+                        setTimeout(() => { this.style.transform = ''; }, 150);
+                    }
+                });
+            });
+            
+            // Add hover effects to stat cards
+            const statCards = document.querySelectorAll('.stat-card');
+            statCards.forEach(card => {
+                card.addEventListener('mouseenter', function() { this.style.transform = 'translateY(-5px)'; });
+                card.addEventListener('mouseleave', function() { this.style.transform = ''; });
+            });
+        });
+
+        function updateUserUI(user) {
+            const nameElements = document.querySelectorAll('.user-link, .profile-info h3');
+            nameElements.forEach(el => {
+                if (el.classList.contains('user-link')) {
+                    el.innerHTML = `<i class="fas fa-user-circle"></i> ${user.first_name} ${user.last_name} <i class="fas fa-caret-down"></i>`;
+                } else {
+                    el.textContent = `${user.first_name} ${user.last_name}`;
+                }
+            });
+            
+            const emailElements = document.querySelectorAll('.profile-info p i.fa-envelope');
+            emailElements.forEach(el => {
+                el.parentElement.innerHTML = `<i class="fas fa-envelope"></i> ${user.email}`;
+            });
+
+            const locationElements = document.querySelectorAll('.profile-info p i.fa-map-marker-alt');
+            locationElements.forEach(el => {
+                el.parentElement.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${user.location || 'Location not set'}`;
+            });
+
+            const titleElement = document.querySelector('.profile-info p:nth-child(3)'); // Assuming order
+            if(titleElement && !titleElement.querySelector('i')) {
+                 titleElement.textContent = user.headline || user.profession || 'Professional';
+            }
+        }
+
+        function updateDashboardStats(portfolio) {
+            // Calculate Profile Completeness
+            let score = 20; // Basic info
+            if (portfolio) {
+                if (portfolio.skills) score += 20;
+                if (portfolio.experience) score += 20;
+                if (portfolio.education) score += 20;
+                if (portfolio.projects) score += 20;
+            }
+            
+            const statValues = document.querySelectorAll('.stat-value');
+            // 0: Job Matches (will update later), 1: Profile Complete, 2: Actions Due, 3: Skill Match
+            if (statValues[1]) statValues[1].textContent = `${score}%`;
+        }
+
+        async function fetchJobStats() {
+            try {
+                const res = await fetch(`${API_BASE}/jobs/recommendations/${currentUser.id}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const count = data.recommendations ? data.recommendations.length : 0;
+                    const statValues = document.querySelectorAll('.stat-value');
+                    if (statValues[0]) statValues[0].textContent = count;
+                    
+                    // Update Skill Match average
+                    if (data.recommendations && data.recommendations.length > 0) {
+                        const avgMatch = data.recommendations.reduce((acc, curr) => acc + curr.match_score, 0) / data.recommendations.length;
+                        if (statValues[3]) statValues[3].textContent = `${Math.round(avgMatch * 100)}%`;
+                    }
+                }
+            } catch (e) {
+                console.error("Error fetching job stats", e);
+            }
+        }
+
+        function initCharts(portfolio) {
+            // Skills Radar Chart
+            const ctxRadar = document.getElementById('skills-radar').getContext('2d');
+            
+            let labels = ['Python', 'Data Analysis', 'Machine Learning', 'Communication', 'SQL', 'Leadership'];
+            let dataPoints = [85, 90, 75, 80, 70, 65]; // Defaults
+
+            if (portfolio && portfolio.skills) {
+                const skills = typeof portfolio.skills === 'string' ? JSON.parse(portfolio.skills) : portfolio.skills;
+                const techSkills = skills.technical || [];
+                const softSkills = skills.soft || [];
+                const allSkills = [...techSkills, ...softSkills].slice(0, 6); // Take top 6
+                
+                if (allSkills.length > 0) {
+                    labels = allSkills;
+                    // Mock proficiency values since we don't store them yet
+                    dataPoints = allSkills.map(() => Math.floor(Math.random() * 30) + 70); 
+                }
+            }
+
+            new Chart(ctxRadar, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Skill Proficiency',
+                        data: dataPoints,
+                        backgroundColor: 'rgba(67, 97, 238, 0.2)',
+                        borderColor: 'rgba(67, 97, 238, 1)',
+                        pointBackgroundColor: 'rgba(67, 97, 238, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(67, 97, 238, 1)'
+                    }]
+                },
+                options: {
+                    elements: {
+                        line: { borderWidth: 3 }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: { display: true },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    }
+                }
+            });
+
+            // Job Match Chart (Bar)
+            const ctxBar = document.getElementById('job-match-chart').getContext('2d');
+            new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: ['Data Scientist', 'ML Engineer', 'Data Analyst', 'Python Dev', 'Research Scientist'],
+                    datasets: [{
+                        label: 'Match Score (%)',
+                        data: [92, 88, 85, 78, 75],
+                        backgroundColor: [
+                            'rgba(67, 97, 238, 0.7)',
+                            'rgba(58, 12, 163, 0.7)',
+                            'rgba(76, 201, 240, 0.7)',
+                            'rgba(247, 37, 133, 0.7)',
+                            'rgba(114, 9, 183, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(67, 97, 238, 1)',
+                            'rgba(58, 12, 163, 1)',
+                            'rgba(76, 201, 240, 1)',
+                            'rgba(247, 37, 133, 1)',
+                            'rgba(114, 9, 183, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
