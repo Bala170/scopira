@@ -2,8 +2,6 @@
 
 Scopira is an AI-powered career guidance platform that helps users optimize their careers through personalized job recommendations, skill gap analysis, and AI-generated resumes.
 
-![Scopira Dashboard](frontend/assets/dashboard-preview.png)
-
 ## Features
 
 ### User Authentication
@@ -150,20 +148,3 @@ scopira/
 4. Push to the branch
 5. Create a pull request
 
-## License
-
-This project is licensed under the MIT License.
-
-## Screenshots
-
-### Dashboard
-![Dashboard](frontend/assets/dashboard-preview.png)
-
-### Job Search
-![Job Search](frontend/assets/jobs-preview.png)
-
-### Portfolio
-![Portfolio](frontend/assets/portfolio-preview.png)
-
-### Profile
-![Profile](frontend/assets/profile-preview.png)
